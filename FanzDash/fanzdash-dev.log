@@ -1,0 +1,33 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+⚠️  Using mock database for development. Set a real DATABASE_URL for production.
+FutureTechManager: Automated analysis disabled due to OpenAI quota limits
+OPENAI_API_KEY not found. Starz Studio will operate in local mode.
+🎬 Starz Studio Service started successfully
+Ecosystem monitoring started
+Streaming HTTP server listening on port 8080
+⚠️  FFmpeg not found - RTMP streaming disabled for development
+RTMP server listening on port 1935 (mock mode)
+node:events:497
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use 0.0.0.0:3000
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at node:net:2206:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Emitted 'error' event on WebSocketServer instance at:
+    at Server.emit (node:events:531:35)
+    at emitErrorNT (node:net:1976:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '0.0.0.0',
+  port: 3000
+}
+
+Node.js v22.20.0
