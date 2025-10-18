@@ -73,8 +73,8 @@ export class StreamingServer extends EventEmitter {
   private streamProcesses = new Map<string, ChildProcess>();
 
   private readonly RTMP_PORT = 1935;
-  private readonly HTTP_PORT = 8080;
-  private readonly WS_PORT = 8081;
+  private readonly HTTP_PORT = parseInt(process.env.STREAMING_PORT || '8082');
+  private readonly WS_PORT = parseInt(process.env.STREAMING_WS_PORT || '8083');
 
   constructor() {
     super();
