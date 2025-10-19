@@ -1,0 +1,87 @@
+services:
+  # FanzDash - Main web application and API
+  fanzdash:
+    build: 
+      context: ./FanzDash
+      dockerfile: Dockerfile
+    env_file:
+      - ./env/.env.staging
+    environment:
+      - PORT=3000
+      - STREAMING_PORT=8082
+      - STREAMING_WS_PORT=8083
+    ports:
+      - "3000:3000"
+      - "8082:8082"  # Streaming HTTP
+      - "8083:8083"  # Streaming WebSocket
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+    depends_on:
+      - redis
+      - mongodb
+    volumes:
+      - ./FanzDash/media:/app/media  # For streaming media files
+
+  # FanzMoneyDash - Financial platform
+  fanzmoneydash:
+    build:
+      context: ./FanzMoneyDash
+      dockerfile: deploy/Dockerfile.production
+    env_file:
+      - ./env/.env.staging
+    environment:
+      - PORT=3001
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 3
+    depends_on:
+      - redis
+      - mongodb
+
+  # Redis - Session store and caching
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  # MongoDB - Primary database
+  mongodb:
+    image: mongo:7
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: fanz_staging
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+    restart: unless-stopped
+
+  # Future services can be added here with ports 4100+
+  # ad-service:
+  #   build: ./services/ad-service
+  #   env_file:
+  #     - ./env/.env.staging
+  #   environment:
+  #     - PORT=4000
+  #   ports:
+  #     - "4000:4000"
+  #   restart: unless-stopped
+
+volumes:
+  redis_data:
+  mongodb_data:

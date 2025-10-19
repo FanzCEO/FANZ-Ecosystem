@@ -22,6 +22,8 @@ import {
 import { aiModerationService } from "./openaiService";
 import session from "express-session";
 import passport from "passport";
+import { createClient } from "redis";
+import RedisStore from "connect-redis";
 import authRoutes from "./auth/authRoutes";
 import lusca from "lusca";
 import ChatService from "./chatService";
@@ -228,19 +230,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/system/*', adminLimiter);
   app.use('/api/security/*', adminLimiter);
 
-  // Initialize session middleware and passport
-  app.use(
-    session({
-      secret:
-        process.env.SESSION_SECRET || "your-secret-key-change-in-production",
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      },
-    }),
-  );
+  // Initialize Redis client for session store
+  let redisClient: any = null;
+  if (process.env.REDIS_URL || process.env.SESSION_STORE === 'redis') {
+    try {
+      redisClient = createClient({
+        url: process.env.REDIS_URL || 'redis://localhost:6379'
+      });
+      await redisClient.connect();
+      console.log('✅ Redis connected for session store');
+    } catch (error) {
+      console.error('⚠️  Redis connection failed, falling back to memory store:', error);
+      redisClient = null;
+    }
+  }
+
+  // Initialize session middleware with Redis store in production
+  const sessionConfig: any = {
+    secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  };
+
+  // Use Redis store if available (production requirement)
+  if (redisClient) {
+    sessionConfig.store = new RedisStore({ client: redisClient });
+  } else if (process.env.NODE_ENV === 'production') {
+    console.warn('⚠️  WARNING: Using MemoryStore in production - this is not recommended for scale!');
+  }
+
+  app.use(session(sessionConfig));
 
   app.use(passport.initialize());
   app.use(passport.session());

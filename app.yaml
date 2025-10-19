@@ -1,0 +1,106 @@
+name: fanz-ecosystem
+region: nyc
+
+services:
+  - name: fanzdash
+    source_dir: /FanzDash
+    github:
+      repo: FANZ-Network/FANZ-Ecosystem
+      branch: main
+      deploy_on_push: true
+    dockerfile_path: FanzDash/Dockerfile
+    http_port: 3000
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: STREAMING_PORT
+        value: "8082"
+      - key: STREAMING_WS_PORT
+        value: "8083"
+      - key: DATABASE_URL
+        value: ${fanz-mongodb.DATABASE_URL}
+      - key: REDIS_URL
+        value: ${fanz-redis.REDIS_URL}
+      - key: SESSION_STORE
+        value: redis
+      - key: SESSION_SECRET
+        value: ${SESSION_SECRET}
+      - key: JWT_SECRET
+        value: ${JWT_SECRET}
+      - key: OTEL_SERVICE_NAME
+        value: fanz-ecosystem-production
+      - key: LOG_FORMAT
+        value: json
+      - key: LOG_LEVEL
+        value: info
+    health_check:
+      http_path: "/health"
+    
+  - name: fanzmoneydash
+    source_dir: /FanzMoneyDash
+    github:
+      repo: FANZ-Network/FANZ-Ecosystem
+      branch: main
+      deploy_on_push: true
+    dockerfile_path: FanzMoneyDash/deploy/Dockerfile.production
+    http_port: 3001
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3001"
+      - key: DATABASE_URL
+        value: ${fanz-mongodb.DATABASE_URL}
+      - key: REDIS_URL
+        value: ${fanz-redis.REDIS_URL}
+      - key: SESSION_STORE
+        value: redis
+      - key: SESSION_SECRET
+        value: ${SESSION_SECRET}
+      - key: JWT_SECRET
+        value: ${JWT_SECRET}
+      - key: OTEL_SERVICE_NAME
+        value: fanz-money-dash-production
+      - key: LOG_FORMAT
+        value: json
+      - key: LOG_LEVEL
+        value: info
+    health_check:
+      http_path: "/health"
+
+databases:
+  - name: fanz-mongodb
+    engine: MONGODB
+    version: "7"
+    size: db-s-1vcpu-1gb
+    num_nodes: 1
+    
+  - name: fanz-redis
+    engine: REDIS
+    version: "7"
+    size: db-s-1vcpu-1gb
+    num_nodes: 1
+
+# Environment variables (managed in DO console)
+# These should be set in the DigitalOcean App Platform console
+# SESSION_SECRET - random 32+ char string
+# JWT_SECRET - random 32+ char string  
+# ENCRYPTION_KEY - random 32+ char string
+# STRIPE_PUBLIC_KEY - Stripe production public key
+# STRIPE_SECRET_KEY - Stripe production secret key
+# OTEL_ENDPOINT - OpenTelemetry endpoint URL
+# CORS_ORIGIN - production domain origins
+
+alerts:
+  - rule: CPU_UTILIZATION
+    value: 80
+  - rule: MEM_UTILIZATION  
+    value: 80
+  - rule: RESTART_COUNT
+    value: 5

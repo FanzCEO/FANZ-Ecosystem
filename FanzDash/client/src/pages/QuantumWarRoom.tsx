@@ -11,7 +11,6 @@ import {
   Environment,
   Float,
   MeshDistortMaterial,
-  Icosphere,
   Trail
 } from '@react-three/drei';
 import { Vector3, Color, Euler } from 'three';
@@ -188,13 +187,13 @@ function HolographicPlatform({ node, selected, onSelect }: {
       {/* Crisis warning indicators */}
       {node.crisisScore > 0.5 && (
         <Float speed={4} rotationIntensity={0.5}>
-          <Icosphere args={[0.3]} position={[0, 2.5, 0]}>
+          <Sphere args={[0.3, 16, 16]} position={[0, 2.5, 0]}>
             <meshBasicMaterial 
               color="#ff3366" 
               emissive="#ff3366"
               emissiveIntensity={0.8}
             />
-          </Icosphere>
+          </Sphere>
         </Float>
       )}
 
@@ -242,7 +241,7 @@ function CrisisHotspotVisualization({ hotspot }: { hotspot: CrisisHotspot }) {
   return (
     <group position={hotspot.position}>
       {/* Warning indicator */}
-      <Icosphere ref={meshRef} args={[0.5]}>
+      <Sphere ref={meshRef} args={[0.5, 16, 16]}>
         <meshBasicMaterial 
           color={getSeverityColor()}
           emissive={getSeverityColor()}
@@ -250,7 +249,7 @@ function CrisisHotspotVisualization({ hotspot }: { hotspot: CrisisHotspot }) {
           transparent
           opacity={0.8}
         />
-      </Icosphere>
+      </Sphere>
 
       {/* Blast radius indicator */}
       <mesh>
