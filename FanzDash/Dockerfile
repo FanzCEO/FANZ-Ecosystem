@@ -7,15 +7,15 @@ RUN corepack enable
 
 WORKDIR /app
 # Copy manifests first for better caching
-COPY package.json pnpm-lock.yaml ./
+COPY FanzDash/package.json FanzDash/pnpm-lock.yaml ./
 
 # Clean install all dependencies
 RUN corepack prepare pnpm@9.12.1 --activate && \
     pnpm config set store-dir /root/.local/share/pnpm/store && \
     pnpm install --prefer-offline
 
-# Copy source (skip build for now to get service running)
-COPY . .
+# Copy FanzDash source code
+COPY FanzDash/ .
 
 # Runtime image (small)
 FROM node:20-alpine AS runner
