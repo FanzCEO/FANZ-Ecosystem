@@ -33,4 +33,4 @@ EXPOSE 3000
 # Healthcheck (optional, if /health endpoint exists)
 HEALTHCHECK --interval=30s --timeout=3s --retries=5 CMD wget -qO- http://localhost:${PORT}/health || exit 1
 
-CMD ["pnpm","dev"]
+CMD ["npx", "tsx", "server/index.ts"]
