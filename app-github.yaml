@@ -1,0 +1,85 @@
+name: fanz-ecosystem
+region: nyc1
+
+services:
+  - name: fanzdash
+    github:
+      repo: FanzCEO/FANZ-Ecosystem
+      branch: main
+      deploy_on_push: true
+    dockerfile_path: FanzDash/Dockerfile
+    source_dir: /
+    http_port: 3000
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: STREAMING_PORT
+        value: "8082"
+      - key: STREAMING_WS_PORT
+        value: "8083"
+      - key: DATABASE_URL
+        value: ${DATABASE_URL}
+      - key: REDIS_URL
+        value: ${REDIS_URL}
+      - key: SESSION_STORE
+        value: redis
+      - key: SESSION_SECRET
+        value: ${SESSION_SECRET}
+      - key: JWT_SECRET
+        value: ${JWT_SECRET}
+      - key: OTEL_SERVICE_NAME
+        value: fanz-ecosystem-production
+      - key: LOG_FORMAT
+        value: json
+      - key: LOG_LEVEL
+        value: info
+    health_check:
+      http_path: "/api/health"
+    routes:
+      - path: /
+    
+  - name: fanzmoneydash
+    github:
+      repo: FanzCEO/FANZ-Ecosystem
+      branch: main
+      deploy_on_push: true
+    dockerfile_path: FanzMoneyDash/deploy/Dockerfile.production
+    source_dir: /
+    http_port: 3001
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3001"
+      - key: DATABASE_URL
+        value: ${DATABASE_URL}
+      - key: REDIS_URL
+        value: ${REDIS_URL}
+      - key: SESSION_STORE
+        value: redis
+      - key: SESSION_SECRET
+        value: ${SESSION_SECRET}
+      - key: JWT_SECRET
+        value: ${JWT_SECRET}
+      - key: OTEL_SERVICE_NAME
+        value: fanz-money-dash-production
+      - key: LOG_FORMAT
+        value: json
+      - key: LOG_LEVEL
+        value: info
+    health_check:
+      http_path: "/health"
+    routes:
+      - path: /money
+
+# Environment variables that need to be set manually in DigitalOcean console:
+# SESSION_SECRET - random 32+ char string
+# JWT_SECRET - random 32+ char string
+# DATABASE_URL - external MongoDB connection string
+# REDIS_URL - external Redis connection string

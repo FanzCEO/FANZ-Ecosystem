@@ -1,0 +1,27 @@
+name: fanz-test
+region: nyc1
+
+services:
+  - name: fanzdash-test
+    source_dir: /
+    dockerfile_path: FanzDash/Dockerfile
+    http_port: 3000
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: DATABASE_URL
+        value: "mongodb://localhost:27017/fanz_test"
+      - key: REDIS_URL
+        value: "redis://localhost:6379/0"
+      - key: SESSION_STORE
+        value: memory
+      - key: SESSION_SECRET
+        value: "test_session_secret_change_in_production"
+      - key: JWT_SECRET
+        value: "test_jwt_secret_change_in_production"
+    health_check:
+      http_path: "/api/health"

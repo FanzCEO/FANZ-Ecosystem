@@ -40,37 +40,66 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = await registerRoutes(app);
+  try {
+    // Environment check
+    console.log('=== FanzDash Server Starting ===');
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+    console.log('SESSION_SECRET exists:', !!process.env.SESSION_SECRET);
+    console.log('PORT:', process.env.PORT || 3000);
+    
+    const server = await registerRoutes(app);
+    console.log('✅ Routes registered successfully');
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      const status = err.status || err.statusCode || 500;
+      const message = err.message || "Internal Server Error";
+      console.error('Express error handler:', err);
 
-    res.status(status).json({ message });
-    throw err;
-  });
+      res.status(status).json({ message });
+      throw err;
+    });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
+    // importantly only setup vite in development and after
+    // setting up all the other routes so the catch-all route
+    // doesn't interfere with the other routes
+    if (app.get("env") === "development") {
+      await setupVite(app, server);
+      console.log('✅ Vite development server configured');
+    } else {
+      serveStatic(app);
+      console.log('✅ Static files configured for production');
+    }
+
+    // ALWAYS serve the app on the port specified in the environment variable PORT
+    // Other ports are firewalled. Default to 3000 if not specified.
+    // this serves both the API and the client.
+    // It is the only port that is not firewalled.
+    const port = parseInt(process.env.PORT || "3000", 10);
+    const host = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
+    
+    server.listen(
+      {
+        port,
+        host,
+      },
+      () => {
+        console.log(`✅ FanzDash server running on ${host}:${port}`);
+        log(`serving on port ${port}`);
+      },
+    );
+    
+    // Handle server errors
+    server.on('error', (err: any) => {
+      console.error('❌ Server error:', err);
+      if (err.code === 'EADDRINUSE') {
+        console.error(`Port ${port} is already in use`);
+      }
+      process.exit(1);
+    });
+    
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
   }
-
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 3000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || "3000", 10);
-  server.listen(
-    {
-      port,
-      host: "0.0.0.0",
-    },
-    () => {
-      log(`serving on port ${port}`);
-    },
-  );
 })();

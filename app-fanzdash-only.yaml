@@ -1,0 +1,41 @@
+name: fanz-dash-test
+region: nyc1
+
+services:
+  - name: fanzdash
+    github:
+      repo: FanzCEO/FANZ-Ecosystem
+      branch: main
+      deploy_on_push: true
+    dockerfile_path: FanzDash/Dockerfile
+    source_dir: /
+    http_port: 3000
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: STREAMING_PORT
+        value: "8082"
+      - key: STREAMING_WS_PORT
+        value: "8083"
+      - key: DATABASE_URL
+        value: "mongodb://localhost:27017/fanz_test"
+      - key: REDIS_URL
+        value: "redis://localhost:6379/0"
+      - key: SESSION_STORE
+        value: memory
+      - key: SESSION_SECRET
+        value: "test_session_secret_change_in_production"
+      - key: JWT_SECRET
+        value: "test_jwt_secret_change_in_production"
+      - key: OTEL_SERVICE_NAME
+        value: fanz-ecosystem-production
+      - key: LOG_FORMAT
+        value: json
+      - key: LOG_LEVEL
+        value: info
+    health_check:
+      http_path: "/api/health"
