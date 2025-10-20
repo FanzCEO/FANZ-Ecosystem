@@ -2136,27 +2136,7 @@ export class DatabaseStorage implements IStorage {
     await db.delete(memberProfiles).where(eq(memberProfiles.id, id));
   }
 
-  // Content Moderation Settings implementation
-  async getModerationSettings(): Promise<ModerationSettings | undefined> {
-    const [result] = await db.select().from(moderationSettings).limit(1);
-    return result;
-  }
-
-  async updateModerationSettings(
-    data: Partial<ModerationSettings>,
-  ): Promise<void> {
-    const existing = await this.getModerationSettings();
-    if (existing) {
-      await db
-        .update(moderationSettings)
-        .set({ ...data, updatedAt: new Date() })
-        .where(eq(moderationSettings.id, existing.id));
-    } else {
-      await db
-        .insert(moderationSettings)
-        .values(data as InsertModerationSettings);
-    }
-  }
+  // Content Moderation Settings implementation - removed duplicate methods
 
   // Platform Messages implementation
   async getPlatformMessages(): Promise<PlatformMessage[]> {

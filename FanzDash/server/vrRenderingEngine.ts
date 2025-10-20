@@ -738,7 +738,7 @@ export class VRRenderingEngine extends EventEmitter {
             if (videoStream) {
               metadata.resolution = `${videoStream.width}x${videoStream.height}`;
               metadata.bitrate = parseInt(videoStream.bit_rate) || 0;
-              metadata.framerate = eval(videoStream.r_frame_rate) || 30;
+              metadata.framerate = this.parseFraction(videoStream.r_frame_rate) || 30;
               metadata.format = videoStream.codec_name;
             }
 
@@ -1440,6 +1440,26 @@ export class VRRenderingEngine extends EventEmitter {
       maxConcurrentProcesses: this.maxConcurrentProcesses,
       estimatedWaitTime: Math.round(estimatedWaitTime / 1000), // Convert to seconds
     };
+  }
+
+  private parseFraction(fractionStr: string): number {
+    // Safely parse frame rate fractions like "30000/1001" or "30/1"
+    if (!fractionStr || typeof fractionStr !== 'string') {
+      return 30; // Default fallback
+    }
+    
+    const parts = fractionStr.split('/');
+    if (parts.length === 2) {
+      const numerator = parseFloat(parts[0]);
+      const denominator = parseFloat(parts[1]);
+      if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
+        return numerator / denominator;
+      }
+    }
+    
+    // Try parsing as a regular number
+    const parsed = parseFloat(fractionStr);
+    return !isNaN(parsed) ? parsed : 30; // Default to 30fps
   }
 }
 

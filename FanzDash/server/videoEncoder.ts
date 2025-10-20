@@ -393,7 +393,7 @@ export class VideoEncoder extends EventEmitter {
             width: videoStream.width,
             height: videoStream.height,
             bitrate: parseInt(format.bit_rate) || 0,
-            fps: eval(videoStream.r_frame_rate), // Safe eval of fraction
+            fps: this.parseFraction(videoStream.r_frame_rate), // Safe fraction parsing
             codec: videoStream.codec_name,
             format: format.format_name,
             size: parseInt(format.size),
@@ -479,6 +479,26 @@ export class VideoEncoder extends EventEmitter {
     }
 
     return false;
+  }
+
+  private parseFraction(fractionStr: string): number {
+    // Safely parse frame rate fractions like "30000/1001" or "30/1"
+    if (!fractionStr || typeof fractionStr !== 'string') {
+      return 30; // Default fallback
+    }
+    
+    const parts = fractionStr.split('/');
+    if (parts.length === 2) {
+      const numerator = parseFloat(parts[0]);
+      const denominator = parseFloat(parts[1]);
+      if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
+        return numerator / denominator;
+      }
+    }
+    
+    // Try parsing as a regular number
+    const parsed = parseFloat(fractionStr);
+    return !isNaN(parsed) ? parsed : 30; // Default to 30fps
   }
 
   getStats() {

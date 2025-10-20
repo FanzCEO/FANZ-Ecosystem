@@ -379,7 +379,7 @@ export class ContentProcessor extends EventEmitter {
                 width: videoStream.width,
                 height: videoStream.height,
               };
-              content.metadata.fps = eval(videoStream.r_frame_rate);
+              content.metadata.fps = this.parseFraction(videoStream.r_frame_rate);
               content.metadata.codec = videoStream.codec_name;
               content.metadata.colorSpace = videoStream.color_space;
             }
@@ -1108,6 +1108,26 @@ export class ContentProcessor extends EventEmitter {
 
   getAllTasks(): ProcessingTask[] {
     return Array.from(this.tasks.values());
+  }
+
+  private parseFraction(fractionStr: string): number {
+    // Safely parse frame rate fractions like "30000/1001" or "30/1"
+    if (!fractionStr || typeof fractionStr !== 'string') {
+      return 30; // Default fallback
+    }
+    
+    const parts = fractionStr.split('/');
+    if (parts.length === 2) {
+      const numerator = parseFloat(parts[0]);
+      const denominator = parseFloat(parts[1]);
+      if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
+        return numerator / denominator;
+      }
+    }
+    
+    // Try parsing as a regular number
+    const parsed = parseFloat(fractionStr);
+    return !isNaN(parsed) ? parsed : 30; // Default to 30fps
   }
 
   getStats() {

@@ -2932,8 +2932,8 @@ var DatabaseStorage = class {
     const [item] = await db.select().from(contentItems).where(eq(contentItems.id, id));
     return item || void 0;
   }
-  async createContentItem(content2) {
-    const [item] = await db.insert(contentItems).values(content2).returning();
+  async createContentItem(content) {
+    const [item] = await db.insert(contentItems).values(content).returning();
     return item;
   }
   async updateContentStatus(id, status, moderatorId) {
@@ -3323,10 +3323,10 @@ var DatabaseStorage = class {
     return stats;
   }
   // Interactive functionality methods
-  async createAnalysisResult(data2) {
+  async createAnalysisResult(data) {
     const analysisResult = {
       id: `analysis-${Date.now()}`,
-      ...data2,
+      ...data,
       createdAt: (/* @__PURE__ */ new Date()).toISOString()
     };
     return analysisResult;
@@ -3733,8 +3733,8 @@ var DatabaseStorage = class {
     const [result] = await db.select().from(apiIntegrations).where(eq(apiIntegrations.serviceName, serviceName)).limit(1);
     return result;
   }
-  async createApiIntegration(data2) {
-    const [result] = await db.insert(apiIntegrations).values(data2).returning();
+  async createApiIntegration(data) {
+    const [result] = await db.insert(apiIntegrations).values(data).returning();
     return result;
   }
   async updateApiIntegration(id, updates) {
@@ -3751,8 +3751,8 @@ var DatabaseStorage = class {
     const [result] = await db.select().from(liveStreamingPrivateRequests).where(eq(liveStreamingPrivateRequests.id, id)).limit(1);
     return result;
   }
-  async createPrivateStreamRequest(data2) {
-    const [result] = await db.insert(liveStreamingPrivateRequests).values(data2).returning();
+  async createPrivateStreamRequest(data) {
+    const [result] = await db.insert(liveStreamingPrivateRequests).values(data).returning();
     return result;
   }
   async updatePrivateStreamRequest(id, updates) {
@@ -3766,12 +3766,12 @@ var DatabaseStorage = class {
     const [result] = await db.select().from(maintenanceMode).limit(1);
     return result;
   }
-  async updateMaintenanceMode(data2) {
+  async updateMaintenanceMode(data) {
     const existing = await this.getMaintenanceMode();
     if (existing) {
-      await db.update(maintenanceMode).set({ ...data2, updatedAt: /* @__PURE__ */ new Date() }).where(eq(maintenanceMode.id, existing.id));
+      await db.update(maintenanceMode).set({ ...data, updatedAt: /* @__PURE__ */ new Date() }).where(eq(maintenanceMode.id, existing.id));
     } else {
-      await db.insert(maintenanceMode).values(data2);
+      await db.insert(maintenanceMode).values(data);
     }
   }
   // Enhanced Member Management implementation
@@ -3786,8 +3786,8 @@ var DatabaseStorage = class {
     const [result] = await db.select().from(memberProfiles).where(eq(memberProfiles.userId, userId)).limit(1);
     return result;
   }
-  async createMemberProfile(data2) {
-    const [result] = await db.insert(memberProfiles).values(data2).returning();
+  async createMemberProfile(data) {
+    const [result] = await db.insert(memberProfiles).values(data).returning();
     return result;
   }
   async updateMemberProfile(id, updates) {
@@ -3796,19 +3796,7 @@ var DatabaseStorage = class {
   async deleteMemberProfile(id) {
     await db.delete(memberProfiles).where(eq(memberProfiles.id, id));
   }
-  // Content Moderation Settings implementation
-  async getModerationSettings() {
-    const [result] = await db.select().from(moderationSettings).limit(1);
-    return result;
-  }
-  async updateModerationSettings(data2) {
-    const existing = await this.getModerationSettings();
-    if (existing) {
-      await db.update(moderationSettings).set({ ...data2, updatedAt: /* @__PURE__ */ new Date() }).where(eq(moderationSettings.id, existing.id));
-    } else {
-      await db.insert(moderationSettings).values(data2);
-    }
-  }
+  // Content Moderation Settings implementation - removed duplicate methods
   // Platform Messages implementation
   async getPlatformMessages() {
     return await db.select().from(platformMessages).orderBy(desc(platformMessages.createdAt));
@@ -3817,8 +3805,8 @@ var DatabaseStorage = class {
     const [result] = await db.select().from(platformMessages).where(eq(platformMessages.id, id)).limit(1);
     return result;
   }
-  async createPlatformMessage(data2) {
-    const [result] = await db.insert(platformMessages).values(data2).returning();
+  async createPlatformMessage(data) {
+    const [result] = await db.insert(platformMessages).values(data).returning();
     return result;
   }
   async updatePlatformMessage(id, updates) {
@@ -3842,8 +3830,8 @@ var DatabaseStorage = class {
     const [result] = await db.select().from(paymentProcessorSettings).where(eq(paymentProcessorSettings.processorName, processorName)).limit(1);
     return result;
   }
-  async createPaymentProcessorSettings(data2) {
-    const [result] = await db.insert(paymentProcessorSettings).values(data2).returning();
+  async createPaymentProcessorSettings(data) {
+    const [result] = await db.insert(paymentProcessorSettings).values(data).returning();
     return result;
   }
   async updatePaymentProcessorSettings(id, updates) {
@@ -3860,8 +3848,8 @@ var DatabaseStorage = class {
     const [result] = await db.select().from(systemLimits).where(eq(systemLimits.id, id)).limit(1);
     return result;
   }
-  async createSystemLimit(data2) {
-    const [result] = await db.insert(systemLimits).values(data2).returning();
+  async createSystemLimit(data) {
+    const [result] = await db.insert(systemLimits).values(data).returning();
     return result;
   }
   async updateSystemLimit(id, updates) {
@@ -4209,7 +4197,7 @@ var OpenAIContentModerationService = class {
   async analyzeImage(imageUrl, contentContext) {
     if (isDevMode) {
       console.log("\u{1F527} Development mode: Using mock image analysis for", imageUrl);
-      await new Promise((resolve2) => setTimeout(resolve2, 100 + Math.random() * 200));
+      await new Promise((resolve) => setTimeout(resolve, 100 + Math.random() * 200));
       return mockImageAnalysis();
     }
     const startTime = Date.now();
@@ -4286,7 +4274,7 @@ Respond in JSON format:
   async analyzeText(text2, contentContext) {
     if (isDevMode) {
       console.log("\u{1F527} Development mode: Using mock text analysis for:", text2.substring(0, 50) + "...");
-      await new Promise((resolve2) => setTimeout(resolve2, 80 + Math.random() * 150));
+      await new Promise((resolve) => setTimeout(resolve, 80 + Math.random() * 150));
       return mockTextAnalysis();
     }
     const startTime = Date.now();
@@ -4998,7 +4986,7 @@ var MultiAuthService = class {
       }
       if (user.backupCodes?.includes(token)) {
         const newBackupCodes = user.backupCodes.filter(
-          (code2) => code2 !== token
+          (code) => code !== token
         );
         await db.update(users).set({ backupCodes: newBackupCodes }).where(eq2(users.id, userId));
         await this.logSecurityEvent(userId, "backup_code_used", {
@@ -5807,7 +5795,7 @@ import { eq as eq4, and as and4, desc as desc2, gte, lte } from "drizzle-orm";
 import crypto2 from "crypto";
 var Compliance2257Service = class {
   // Create new 2257 record
-  async createRecord(userId, recordData, metadata2) {
+  async createRecord(userId, recordData, metadata) {
     try {
       const retentionDate = /* @__PURE__ */ new Date();
       retentionDate.setFullYear(retentionDate.getFullYear() + 5);
@@ -5815,10 +5803,10 @@ var Compliance2257Service = class {
         ...recordData,
         userId,
         retentionDate,
-        ipAddress: metadata2.ipAddress,
-        userAgent: metadata2.userAgent,
-        deviceFingerprint: metadata2.deviceFingerprint,
-        geoLocation: metadata2.geoLocation,
+        ipAddress: metadata.ipAddress,
+        userAgent: metadata.userAgent,
+        deviceFingerprint: metadata.deviceFingerprint,
+        geoLocation: metadata.geoLocation,
         verificationStatus: "pending"
       }).returning();
       await this.createComplianceChecklist(record[0].id, userId);
@@ -5918,18 +5906,18 @@ var Compliance2257Service = class {
     };
   }
   // Create digital signature
-  createDigitalSignature(data2, metadata2) {
+  createDigitalSignature(data, metadata) {
     const timestamp2 = (/* @__PURE__ */ new Date()).toISOString();
-    const hash = crypto2.createHash("sha256").update(data2 + timestamp2).digest("hex");
-    const signature = crypto2.createHash("sha256").update(hash + metadata2.userId).digest("hex");
+    const hash = crypto2.createHash("sha256").update(data + timestamp2).digest("hex");
+    const signature = crypto2.createHash("sha256").update(hash + metadata.userId).digest("hex");
     return {
       signature,
       timestamp: timestamp2,
       hash,
       metadata: {
-        ipAddress: metadata2.ipAddress,
-        userAgent: metadata2.userAgent,
-        deviceFingerprint: metadata2.deviceFingerprint
+        ipAddress: metadata.ipAddress,
+        userAgent: metadata.userAgent,
+        deviceFingerprint: metadata.deviceFingerprint
       }
     };
   }
@@ -6261,18 +6249,18 @@ var VideoEncoder = class extends EventEmitter {
       await fs.mkdir(join(process.cwd(), "media", dir), { recursive: true });
     }
   }
-  async createEncodingJob(inputPath2, format2, quality, options = {}) {
+  async createEncodingJob(inputPath, format, quality, options = {}) {
     const jobId = randomUUID();
     const outputPath = await this.generateOutputPath(
-      inputPath2,
-      format2,
+      inputPath,
+      format,
       quality
     );
     const job = {
       id: jobId,
-      inputPath: inputPath2,
+      inputPath,
       outputPath,
-      format: format2,
+      format,
       quality,
       resolution: options.resolution || "original",
       bitrate: options.bitrate,
@@ -6288,10 +6276,10 @@ var VideoEncoder = class extends EventEmitter {
     }
     return jobId;
   }
-  async generateOutputPath(inputPath2, format2, quality) {
-    const baseName = basename(inputPath2, extname(inputPath2));
+  async generateOutputPath(inputPath, format, quality) {
+    const baseName = basename(inputPath, extname(inputPath));
     const timestamp2 = Date.now();
-    switch (format2) {
+    switch (format) {
       case "hls":
         return join(
           process.cwd(),
@@ -6309,7 +6297,7 @@ var VideoEncoder = class extends EventEmitter {
           "manifest.mpd"
         );
       default:
-        const ext = format2 === "mp4" ? "mp4" : "webm";
+        const ext = format === "mp4" ? "mp4" : "webm";
         return join(
           process.cwd(),
           "media",
@@ -6332,9 +6320,9 @@ var VideoEncoder = class extends EventEmitter {
       if (job.metadata) {
         this.trackProgress(jobId, process2);
       }
-      process2.on("close", async (code2) => {
+      process2.on("close", async (code) => {
         this.activeProcesses.delete(jobId);
-        if (code2 === 0) {
+        if (code === 0) {
           job.status = "completed";
           job.endTime = /* @__PURE__ */ new Date();
           job.progress = 100;
@@ -6342,7 +6330,7 @@ var VideoEncoder = class extends EventEmitter {
           this.emit("jobCompleted", job);
         } else {
           job.status = "failed";
-          job.error = `FFmpeg process exited with code ${code2}`;
+          job.error = `FFmpeg process exited with code ${code}`;
           this.emit("jobFailed", job);
         }
         this.processNextJob();
@@ -6435,8 +6423,8 @@ var VideoEncoder = class extends EventEmitter {
     const job = this.jobs.get(jobId);
     if (!job || !job.metadata) return;
     let progressData = "";
-    process2.stderr?.on("data", (data2) => {
-      progressData += data2.toString();
+    process2.stderr?.on("data", (data) => {
+      progressData += data.toString();
       const timeMatch = progressData.match(
         /time=(\d{2}):(\d{2}):(\d{2}\.\d{2})/
       );
@@ -6454,7 +6442,7 @@ var VideoEncoder = class extends EventEmitter {
   }
   async extractMetadata(inputPath) {
     return new Promise((resolve, reject) => {
-      const process = spawn("ffprobe", [
+      const process2 = spawn("ffprobe", [
         "-v",
         "quiet",
         "-print_format",
@@ -6464,10 +6452,10 @@ var VideoEncoder = class extends EventEmitter {
         inputPath
       ]);
       let output = "";
-      process.stdout.on("data", (data2) => {
-        output += data2.toString();
+      process2.stdout.on("data", (data) => {
+        output += data.toString();
       });
-      process.on("close", (code) => {
+      process2.on("close", (code) => {
         if (code !== 0) {
           reject(new Error("Failed to extract metadata"));
           return;
@@ -6483,8 +6471,8 @@ var VideoEncoder = class extends EventEmitter {
             width: videoStream.width,
             height: videoStream.height,
             bitrate: parseInt(format.bit_rate) || 0,
-            fps: eval(videoStream.r_frame_rate),
-            // Safe eval of fraction
+            fps: this.parseFraction(videoStream.r_frame_rate),
+            // Safe fraction parsing
             codec: videoStream.codec_name,
             format: format.format_name,
             size: parseInt(format.size)
@@ -6495,17 +6483,17 @@ var VideoEncoder = class extends EventEmitter {
       });
     });
   }
-  async generateThumbnail(inputPath2, jobId) {
+  async generateThumbnail(inputPath, jobId) {
     const thumbnailPath = join(
       process.cwd(),
       "media",
       "thumbnails",
       `${jobId}.jpg`
     );
-    return new Promise((resolve2, reject2) => {
+    return new Promise((resolve, reject) => {
       const process2 = spawn("ffmpeg", [
         "-i",
-        inputPath2,
+        inputPath,
         "-vf",
         "thumbnail,scale=320:240",
         "-frames:v",
@@ -6513,11 +6501,11 @@ var VideoEncoder = class extends EventEmitter {
         "-y",
         thumbnailPath
       ]);
-      process2.on("close", (code2) => {
-        if (code2 === 0) {
-          resolve2();
+      process2.on("close", (code) => {
+        if (code === 0) {
+          resolve();
         } else {
-          reject2(new Error("Failed to generate thumbnail"));
+          reject(new Error("Failed to generate thumbnail"));
         }
       });
     });
@@ -6555,6 +6543,21 @@ var VideoEncoder = class extends EventEmitter {
       return true;
     }
     return false;
+  }
+  parseFraction(fractionStr) {
+    if (!fractionStr || typeof fractionStr !== "string") {
+      return 30;
+    }
+    const parts = fractionStr.split("/");
+    if (parts.length === 2) {
+      const numerator = parseFloat(parts[0]);
+      const denominator = parseFloat(parts[1]);
+      if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
+        return numerator / denominator;
+      }
+    }
+    const parsed = parseFloat(fractionStr);
+    return !isNaN(parsed) ? parsed : 30;
   }
   getStats() {
     const jobs = Array.from(this.jobs.values());
@@ -6635,8 +6638,8 @@ var StreamingServer = class extends EventEmitter2 {
         return;
       }
     });
-    testProcess.on("exit", (code2) => {
-      if (code2 === 0) {
+    testProcess.on("exit", (code) => {
+      if (code === 0) {
         this.rtmpServer = spawn2("ffmpeg", [
           "-listen",
           "1",
@@ -6778,15 +6781,15 @@ var StreamingServer = class extends EventEmitter2 {
       this.emit("streamStarted", session2);
       this.broadcastToViewers(session2.id, { type: "streamStarted", session: session2 });
     });
-    streamProcess.stderr?.on("data", (data2) => {
-      const output2 = data2.toString();
-      this.parseStreamInfo(session2, output2);
+    streamProcess.stderr?.on("data", (data) => {
+      const output = data.toString();
+      this.parseStreamInfo(session2, output);
       if (session2.settings.enableThumbnails && Math.random() < 0.01) {
         this.generateStreamThumbnail(session2);
       }
     });
-    streamProcess.on("close", (code2) => {
-      session2.status = code2 === 0 ? "stopped" : "error";
+    streamProcess.on("close", (code) => {
+      session2.status = code === 0 ? "stopped" : "error";
       session2.endTime = /* @__PURE__ */ new Date();
       this.streamProcesses.delete(session2.id);
       this.emit("streamEnded", session2);
@@ -6799,16 +6802,16 @@ var StreamingServer = class extends EventEmitter2 {
       this.emit("streamError", session2, error);
     });
   }
-  parseStreamInfo(session2, output2) {
-    const bitrateMatch = output2.match(/bitrate=\s*(\d+\.?\d*)kbits\/s/);
+  parseStreamInfo(session2, output) {
+    const bitrateMatch = output.match(/bitrate=\s*(\d+\.?\d*)kbits\/s/);
     if (bitrateMatch) {
       session2.bitrate = parseFloat(bitrateMatch[1]);
     }
-    const fpsMatch = output2.match(/fps=\s*(\d+\.?\d*)/);
+    const fpsMatch = output.match(/fps=\s*(\d+\.?\d*)/);
     if (fpsMatch) {
       session2.fps = parseFloat(fpsMatch[1]);
     }
-    const timeMatch = output2.match(/time=(\d{2}):(\d{2}):(\d{2}\.\d{2})/);
+    const timeMatch = output.match(/time=(\d{2}):(\d{2}):(\d{2}\.\d{2})/);
     if (timeMatch) {
       const [, hours, minutes, seconds] = timeMatch;
       session2.duration = parseInt(hours) * 3600 + parseInt(minutes) * 60 + parseFloat(seconds);
@@ -6836,8 +6839,8 @@ var StreamingServer = class extends EventEmitter2 {
       "-y",
       thumbnailPath
     ]);
-    thumbnailProcess.on("close", (code2) => {
-      if (code2 === 0) {
+    thumbnailProcess.on("close", (code) => {
+      if (code === 0) {
         session2.thumbnailUrl = `/thumbnails/${session2.id}_${Date.now()}.jpg`;
         this.emit("thumbnailGenerated", session2);
       }
@@ -6850,7 +6853,7 @@ var StreamingServer = class extends EventEmitter2 {
       if (pathParts[0] === "hls" && pathParts.length >= 2) {
         const sessionId = pathParts[1];
         const filename = pathParts[2] || "playlist.m3u8";
-        const filePath2 = join2(
+        const filePath = join2(
           process.cwd(),
           "media",
           "streams",
@@ -6858,20 +6861,20 @@ var StreamingServer = class extends EventEmitter2 {
           sessionId,
           filename
         );
-        const content2 = await fs2.readFile(filePath2);
+        const content = await fs2.readFile(filePath);
         const contentType = filename.endsWith(".m3u8") ? "application/vnd.apple.mpegurl" : "video/mp2t";
         res.writeHead(200, {
           "Content-Type": contentType,
           "Cache-Control": "no-cache",
           "Access-Control-Allow-Origin": "*"
         });
-        res.end(content2);
+        res.end(content);
         return;
       }
       if (pathParts[0] === "dash" && pathParts.length >= 2) {
         const sessionId = pathParts[1];
         const filename = pathParts[2] || "manifest.mpd";
-        const filePath2 = join2(
+        const filePath = join2(
           process.cwd(),
           "media",
           "streams",
@@ -6879,32 +6882,32 @@ var StreamingServer = class extends EventEmitter2 {
           sessionId,
           filename
         );
-        const content2 = await fs2.readFile(filePath2);
+        const content = await fs2.readFile(filePath);
         const contentType = filename.endsWith(".mpd") ? "application/dash+xml" : "video/mp4";
         res.writeHead(200, {
           "Content-Type": contentType,
           "Cache-Control": "no-cache",
           "Access-Control-Allow-Origin": "*"
         });
-        res.end(content2);
+        res.end(content);
         return;
       }
       if (pathParts[0] === "thumbnails" && pathParts.length === 2) {
         const filename = pathParts[1];
-        const filePath2 = join2(
+        const filePath = join2(
           process.cwd(),
           "media",
           "streams",
           "thumbnails",
           filename
         );
-        const content2 = await fs2.readFile(filePath2);
+        const content = await fs2.readFile(filePath);
         res.writeHead(200, {
           "Content-Type": "image/jpeg",
           "Cache-Control": "public, max-age=3600",
           "Access-Control-Allow-Origin": "*"
         });
-        res.end(content2);
+        res.end(content);
         return;
       }
       res.writeHead(404, { "Content-Type": "text/plain" });
@@ -6917,9 +6920,9 @@ var StreamingServer = class extends EventEmitter2 {
   }
   handleWebSocketConnection(ws2, req) {
     const viewerId = randomUUID2();
-    ws2.on("message", (data2) => {
+    ws2.on("message", (data) => {
       try {
-        const message = JSON.parse(data2.toString());
+        const message = JSON.parse(data.toString());
         this.handleWebSocketMessage(ws2, viewerId, message);
       } catch (error) {
         console.error("WebSocket message error:", error);
@@ -7033,14 +7036,14 @@ var StreamingServer = class extends EventEmitter2 {
       this.emit("qualityChanged", viewer);
     }
   }
-  broadcastToViewers(sessionId, data2) {
+  broadcastToViewers(sessionId, data) {
     const viewers = Array.from(this.viewers.values()).filter(
       (v) => v.sessionId === sessionId
     );
     for (const viewer of viewers) {
       const ws2 = viewer.ws;
       if (ws2 && ws2.readyState === WebSocket.OPEN) {
-        ws2.send(JSON.stringify(data2));
+        ws2.send(JSON.stringify(data));
       }
     }
   }
@@ -7120,13 +7123,13 @@ var ContentProcessor = class extends EventEmitter3 {
       await fs3.mkdir(join3(process.cwd(), "media", dir), { recursive: true });
     }
   }
-  async processContent(filePath2, userId, options = {}) {
+  async processContent(filePath, userId, options = {}) {
     const contentId = randomUUID3();
-    const filename = filePath2.split("/").pop() || "unknown";
-    const fileStats = await fs3.stat(filePath2);
+    const filename = filePath.split("/").pop() || "unknown";
+    const fileStats = await fs3.stat(filePath);
     const ext = extname2(filename).toLowerCase();
-    const type2 = options.type || this.detectContentType(ext);
-    const hash = await this.calculateFileHash(filePath2);
+    const type = options.type || this.detectContentType(ext);
+    const hash = await this.calculateFileHash(filePath);
     const duplicate = Array.from(this.content.values()).find(
       (item) => item.metadata.hash === hash
     );
@@ -7135,8 +7138,8 @@ var ContentProcessor = class extends EventEmitter3 {
     }
     const contentItem = {
       id: contentId,
-      type: type2,
-      originalPath: filePath2,
+      type,
+      originalPath: filePath,
       processedPaths: {},
       metadata: {
         filename,
@@ -7181,7 +7184,7 @@ var ContentProcessor = class extends EventEmitter3 {
         progress: 0
       });
     }
-    if (options.generateThumbnails !== false && ["image", "video"].includes(type2)) {
+    if (options.generateThumbnails !== false && ["image", "video"].includes(type)) {
       tasks.push({
         contentId,
         type: "thumbnail",
@@ -7199,7 +7202,7 @@ var ContentProcessor = class extends EventEmitter3 {
         progress: 0
       });
     }
-    if (type2 === "video") {
+    if (type === "video") {
       tasks.push({
         contentId,
         type: "transcode",
@@ -7248,56 +7251,56 @@ var ContentProcessor = class extends EventEmitter3 {
     this.activeProcesses--;
   }
   async executeTask(task) {
-    const content2 = this.content.get(task.contentId);
-    if (!content2) throw new Error("Content not found");
+    const content = this.content.get(task.contentId);
+    if (!content) throw new Error("Content not found");
     switch (task.type) {
       case "analyze":
-        await this.analyzeContent(content2, task);
+        await this.analyzeContent(content, task);
         break;
       case "thumbnail":
-        await this.generateThumbnails(content2, task);
+        await this.generateThumbnails(content, task);
         break;
       case "optimize":
-        await this.optimizeContent(content2, task);
+        await this.optimizeContent(content, task);
         break;
       case "transcode":
-        await this.transcodeVideo(content2, task);
+        await this.transcodeVideo(content, task);
         break;
       case "watermark":
-        await this.addWatermark(content2, task);
+        await this.addWatermark(content, task);
         break;
       default:
         throw new Error(`Unknown task type: ${task.type}`);
     }
   }
-  async analyzeContent(content2, task) {
+  async analyzeContent(content, task) {
     task.progress = 10;
-    await this.extractMetadata(content2);
+    await this.extractMetadata(content);
     task.progress = 30;
-    switch (content2.type) {
+    switch (content.type) {
       case "image":
-        await this.analyzeImage(content2);
+        await this.analyzeImage(content);
         break;
       case "video":
-        await this.analyzeVideo(content2);
+        await this.analyzeVideo(content);
         break;
       case "audio":
-        await this.analyzeAudio(content2);
+        await this.analyzeAudio(content);
         break;
       case "text":
-        await this.analyzeText(content2);
+        await this.analyzeText(content);
         break;
     }
     task.progress = 80;
-    this.applyModerationRules(content2);
+    this.applyModerationRules(content);
     task.progress = 100;
-    content2.status = "completed";
-    content2.processTime = /* @__PURE__ */ new Date();
+    content.status = "completed";
+    content.processTime = /* @__PURE__ */ new Date();
   }
   async extractMetadata(content) {
     if (["image", "video", "audio"].includes(content.type)) {
       return new Promise((resolve, reject) => {
-        const process = spawn3("ffprobe", [
+        const process2 = spawn3("ffprobe", [
           "-v",
           "quiet",
           "-print_format",
@@ -7307,10 +7310,10 @@ var ContentProcessor = class extends EventEmitter3 {
           content.originalPath
         ]);
         let output = "";
-        process.stdout.on("data", (data2) => {
-          output += data2.toString();
+        process2.stdout.on("data", (data) => {
+          output += data.toString();
         });
-        process.on("close", (code) => {
+        process2.on("close", (code) => {
           if (code !== 0) {
             reject(new Error("Failed to extract metadata"));
             return;
@@ -7331,7 +7334,7 @@ var ContentProcessor = class extends EventEmitter3 {
                 width: videoStream.width,
                 height: videoStream.height
               };
-              content.metadata.fps = eval(videoStream.r_frame_rate);
+              content.metadata.fps = this.parseFraction(videoStream.r_frame_rate);
               content.metadata.codec = videoStream.codec_name;
               content.metadata.colorSpace = videoStream.color_space;
             }
@@ -7343,10 +7346,10 @@ var ContentProcessor = class extends EventEmitter3 {
       });
     }
   }
-  async analyzeImage(content2) {
+  async analyzeImage(content) {
     if (isDevMode2) {
       console.log("\u{1F527} Development mode: Using mock image analysis");
-      content2.analysis = {
+      content.analysis = {
         aiScore: Math.random() * 30,
         // Low risk for dev
         confidence: 85,
@@ -7361,7 +7364,7 @@ var ContentProcessor = class extends EventEmitter3 {
       };
       return;
     }
-    const imageBuffer = await fs3.readFile(content2.originalPath);
+    const imageBuffer = await fs3.readFile(content.originalPath);
     const base64Image = imageBuffer.toString("base64");
     const response = await openai3.chat.completions.create({
       model: "gpt-4o",
@@ -7396,7 +7399,7 @@ var ContentProcessor = class extends EventEmitter3 {
       max_tokens: 1e3
     });
     const analysis = JSON.parse(response.choices[0].message.content);
-    content2.analysis = {
+    content.analysis = {
       aiScore: analysis.overall_score || 0,
       confidence: 85,
       // GPT-4o confidence
@@ -7415,24 +7418,24 @@ var ContentProcessor = class extends EventEmitter3 {
       }
     };
   }
-  async analyzeVideo(content2) {
+  async analyzeVideo(content) {
     const framesDir = join3(
       process.cwd(),
       "media",
       "content",
       "temp",
-      content2.id
+      content.id
     );
     await fs3.mkdir(framesDir, { recursive: true });
-    const duration = content2.metadata.duration || 10;
+    const duration = content.metadata.duration || 10;
     const intervals = [0.1, 0.3, 0.5, 0.7, 0.9].map((p) => p * duration);
     const frameAnalyses = [];
     for (let i = 0; i < intervals.length; i++) {
       const framePath = join3(framesDir, `frame_${i}.jpg`);
-      await new Promise((resolve2, reject2) => {
+      await new Promise((resolve, reject) => {
         const process2 = spawn3("ffmpeg", [
           "-i",
-          content2.originalPath,
+          content.originalPath,
           "-ss",
           intervals[i].toString(),
           "-vframes",
@@ -7440,9 +7443,9 @@ var ContentProcessor = class extends EventEmitter3 {
           "-y",
           framePath
         ]);
-        process2.on("close", (code2) => {
-          if (code2 === 0) resolve2();
-          else reject2(new Error("Frame extraction failed"));
+        process2.on("close", (code) => {
+          if (code === 0) resolve();
+          else reject(new Error("Frame extraction failed"));
         });
       });
       const frameBuffer = await fs3.readFile(framePath);
@@ -7491,26 +7494,26 @@ var ContentProcessor = class extends EventEmitter3 {
       }
       await fs3.unlink(framePath);
     }
-    content2.analysis = this.aggregateFrameAnalyses(frameAnalyses);
+    content.analysis = this.aggregateFrameAnalyses(frameAnalyses);
     await fs3.rmdir(framesDir);
   }
-  async analyzeAudio(content2) {
+  async analyzeAudio(content) {
     if (isDevMode2) {
       console.log("\u{1F527} Development mode: Using mock audio analysis");
       const mockText = "This is a sample transcription for development testing purposes.";
-      content2.analysis.text = mockText;
-      content2.analysis.adult = { score: Math.random() * 10, category: "safe" };
-      content2.analysis.violence = { score: Math.random() * 8, category: "none" };
-      content2.analysis.aiScore = Math.random() * 20;
+      content.analysis.text = mockText;
+      content.analysis.adult = { score: Math.random() * 10, category: "safe" };
+      content.analysis.violence = { score: Math.random() * 8, category: "none" };
+      content.analysis.aiScore = Math.random() * 20;
       return;
     }
-    const audioBuffer = await fs3.readFile(content2.originalPath);
+    const audioBuffer = await fs3.readFile(content.originalPath);
     const transcription = await openai3.audio.transcriptions.create({
-      file: new File([audioBuffer], content2.metadata.filename),
+      file: new File([audioBuffer], content.metadata.filename),
       model: "whisper-1",
       response_format: "json"
     });
-    content2.analysis.text = transcription.text;
+    content.analysis.text = transcription.text;
     if (transcription.text) {
       const textAnalysis = await openai3.chat.completions.create({
         model: "gpt-5",
@@ -7528,26 +7531,26 @@ var ContentProcessor = class extends EventEmitter3 {
         response_format: { type: "json_object" }
       });
       const analysis = JSON.parse(textAnalysis.choices[0].message.content);
-      content2.analysis.adult = analysis.adult || { score: 0, category: "safe" };
-      content2.analysis.violence = analysis.violence || {
+      content.analysis.adult = analysis.adult || { score: 0, category: "safe" };
+      content.analysis.violence = analysis.violence || {
         score: 0,
         category: "none"
       };
-      content2.analysis.aiScore = analysis.overall_score || 0;
+      content.analysis.aiScore = analysis.overall_score || 0;
     }
   }
-  async analyzeText(content2) {
-    const textContent = await fs3.readFile(content2.originalPath, "utf-8");
+  async analyzeText(content) {
+    const textContent = await fs3.readFile(content.originalPath, "utf-8");
     if (isDevMode2) {
       console.log("\u{1F527} Development mode: Using mock text analysis");
-      content2.analysis.text = textContent;
-      content2.analysis.language = "en";
-      content2.analysis.sentiment = { score: 0.2, magnitude: 0.3 };
-      content2.analysis.categories = [{ name: "text", confidence: 0.95 }];
-      content2.analysis.adult = { score: Math.random() * 15, category: "safe" };
-      content2.analysis.violence = { score: Math.random() * 12, category: "none" };
-      content2.analysis.aiScore = Math.random() * 25;
-      content2.analysis.confidence = 90;
+      content.analysis.text = textContent;
+      content.analysis.language = "en";
+      content.analysis.sentiment = { score: 0.2, magnitude: 0.3 };
+      content.analysis.categories = [{ name: "text", confidence: 0.95 }];
+      content.analysis.adult = { score: Math.random() * 15, category: "safe" };
+      content.analysis.violence = { score: Math.random() * 12, category: "none" };
+      content.analysis.aiScore = Math.random() * 25;
+      content.analysis.confidence = 90;
       return;
     }
     const response = await openai3.chat.completions.create({
@@ -7566,17 +7569,17 @@ var ContentProcessor = class extends EventEmitter3 {
       response_format: { type: "json_object" }
     });
     const analysis = JSON.parse(response.choices[0].message.content);
-    content2.analysis.text = textContent;
-    content2.analysis.language = analysis.language;
-    content2.analysis.sentiment = analysis.sentiment;
-    content2.analysis.categories = analysis.categories || [];
-    content2.analysis.adult = analysis.adult || { score: 0, category: "safe" };
-    content2.analysis.violence = analysis.violence || {
+    content.analysis.text = textContent;
+    content.analysis.language = analysis.language;
+    content.analysis.sentiment = analysis.sentiment;
+    content.analysis.categories = analysis.categories || [];
+    content.analysis.adult = analysis.adult || { score: 0, category: "safe" };
+    content.analysis.violence = analysis.violence || {
       score: 0,
       category: "none"
     };
-    content2.analysis.aiScore = analysis.overall_score || 0;
-    content2.analysis.confidence = 90;
+    content.analysis.aiScore = analysis.overall_score || 0;
+    content.analysis.confidence = 90;
   }
   aggregateFrameAnalyses(frameAnalyses) {
     const avgScore = (field) => frameAnalyses.reduce((sum, analysis) => sum + (analysis[field] || 0), 0) / frameAnalyses.length;
@@ -7610,29 +7613,29 @@ var ContentProcessor = class extends EventEmitter3 {
       }
     };
   }
-  applyModerationRules(content2) {
+  applyModerationRules(content) {
     const flags = [];
-    if (content2.analysis.adult.score > 80) {
+    if (content.analysis.adult.score > 80) {
       flags.push("explicit_adult");
-      content2.nsfw = true;
-    } else if (content2.analysis.adult.score > 50) {
+      content.nsfw = true;
+    } else if (content.analysis.adult.score > 50) {
       flags.push("suggestive_adult");
-      content2.nsfw = true;
+      content.nsfw = true;
     }
-    if (content2.analysis.violence.score > 70) {
+    if (content.analysis.violence.score > 70) {
       flags.push("graphic_violence");
-    } else if (content2.analysis.violence.score > 40) {
+    } else if (content.analysis.violence.score > 40) {
       flags.push("mild_violence");
     }
-    if (content2.analysis.aiScore > 75) {
+    if (content.analysis.aiScore > 75) {
       flags.push("high_risk");
-      content2.approved = false;
-    } else if (content2.analysis.aiScore > 50) {
+      content.approved = false;
+    } else if (content.analysis.aiScore > 50) {
       flags.push("moderate_risk");
     }
-    content2.moderationFlags = flags;
+    content.moderationFlags = flags;
   }
-  async generateThumbnails(content2, task) {
+  async generateThumbnails(content, task) {
     const thumbnailDir = join3(process.cwd(), "media", "content", "thumbnails");
     const sizes = [
       { name: "small", size: "150x150" },
@@ -7640,23 +7643,23 @@ var ContentProcessor = class extends EventEmitter3 {
       { name: "large", size: "600x600" }
     ];
     for (const { name, size } of sizes) {
-      const outputPath = join3(thumbnailDir, `${content2.id}_${name}.jpg`);
+      const outputPath = join3(thumbnailDir, `${content.id}_${name}.jpg`);
       let command = [];
-      if (content2.type === "image") {
+      if (content.type === "image") {
         command = [
           "-i",
-          content2.originalPath,
+          content.originalPath,
           "-vf",
           `scale=${size}:force_original_aspect_ratio=decrease,pad=${size}:(ow-iw)/2:(oh-ih)/2:black`,
           "-y",
           outputPath
         ];
-      } else if (content2.type === "video") {
-        const duration = content2.metadata.duration || 10;
+      } else if (content.type === "video") {
+        const duration = content.metadata.duration || 10;
         const seekTime = duration * 0.3;
         command = [
           "-i",
-          content2.originalPath,
+          content.originalPath,
           "-ss",
           seekTime.toString(),
           "-vframes",
@@ -7668,14 +7671,14 @@ var ContentProcessor = class extends EventEmitter3 {
         ];
       }
       if (command.length > 0) {
-        await new Promise((resolve2, reject2) => {
+        await new Promise((resolve, reject) => {
           const process2 = spawn3("ffmpeg", command);
-          process2.on("close", (code2) => {
-            if (code2 === 0) {
-              content2.processedPaths[`thumbnail_${name}`] = outputPath;
-              resolve2();
+          process2.on("close", (code) => {
+            if (code === 0) {
+              content.processedPaths[`thumbnail_${name}`] = outputPath;
+              resolve();
             } else {
-              reject2(new Error(`Thumbnail generation failed for ${name}`));
+              reject(new Error(`Thumbnail generation failed for ${name}`));
             }
           });
         });
@@ -7683,18 +7686,18 @@ var ContentProcessor = class extends EventEmitter3 {
       task.progress = (sizes.indexOf({ name, size }) + 1) / sizes.length * 100;
     }
   }
-  async optimizeContent(content2, task) {
+  async optimizeContent(content, task) {
     const optimizedDir = join3(process.cwd(), "media", "content", "optimized");
     const outputPath = join3(
       optimizedDir,
-      `${content2.id}_optimized${extname2(content2.originalPath)}`
+      `${content.id}_optimized${extname2(content.originalPath)}`
     );
     let command = [];
-    switch (content2.type) {
+    switch (content.type) {
       case "image":
         command = [
           "-i",
-          content2.originalPath,
+          content.originalPath,
           "-vf",
           "scale=1920:1080:force_original_aspect_ratio=decrease",
           "-q:v",
@@ -7706,7 +7709,7 @@ var ContentProcessor = class extends EventEmitter3 {
       case "video":
         command = [
           "-i",
-          content2.originalPath,
+          content.originalPath,
           "-c:v",
           "libx264",
           "-preset",
@@ -7728,7 +7731,7 @@ var ContentProcessor = class extends EventEmitter3 {
       case "audio":
         command = [
           "-i",
-          content2.originalPath,
+          content.originalPath,
           "-c:a",
           "aac",
           "-b:a",
@@ -7741,21 +7744,21 @@ var ContentProcessor = class extends EventEmitter3 {
         break;
     }
     if (command.length > 0) {
-      await new Promise((resolve2, reject2) => {
+      await new Promise((resolve, reject) => {
         const process2 = spawn3("ffmpeg", command);
-        process2.on("close", (code2) => {
-          if (code2 === 0) {
-            content2.processedPaths.optimized = outputPath;
+        process2.on("close", (code) => {
+          if (code === 0) {
+            content.processedPaths.optimized = outputPath;
             task.progress = 100;
-            resolve2();
+            resolve();
           } else {
-            reject2(new Error("Content optimization failed"));
+            reject(new Error("Content optimization failed"));
           }
         });
-        if (["video", "audio"].includes(content2.type) && content2.metadata.duration) {
+        if (["video", "audio"].includes(content.type) && content.metadata.duration) {
           let progressData = "";
-          process2.stderr?.on("data", (data2) => {
-            progressData += data2.toString();
+          process2.stderr?.on("data", (data) => {
+            progressData += data.toString();
             const timeMatch = progressData.match(
               /time=(\d{2}):(\d{2}):(\d{2}\.\d{2})/
             );
@@ -7764,7 +7767,7 @@ var ContentProcessor = class extends EventEmitter3 {
               const currentTime = parseInt(hours) * 3600 + parseInt(minutes) * 60 + parseFloat(seconds);
               task.progress = Math.min(
                 100,
-                Math.round(currentTime / content2.metadata.duration * 100)
+                Math.round(currentTime / content.metadata.duration * 100)
               );
             }
           });
@@ -7772,8 +7775,8 @@ var ContentProcessor = class extends EventEmitter3 {
       });
     }
   }
-  async transcodeVideo(content2, task) {
-    if (content2.type !== "video") return;
+  async transcodeVideo(content, task) {
+    if (content.type !== "video") return;
     const transcodedDir = join3(process.cwd(), "media", "content", "transcoded");
     const formats = [
       { name: "mp4_h264", ext: "mp4", codec: "libx264", preset: "medium" },
@@ -7781,26 +7784,26 @@ var ContentProcessor = class extends EventEmitter3 {
       { name: "hls", ext: "m3u8", codec: "libx264", preset: "fast" }
     ];
     for (let i = 0; i < formats.length; i++) {
-      const format2 = formats[i];
+      const format = formats[i];
       const outputPath = join3(
         transcodedDir,
-        `${content2.id}_${format2.name}.${format2.ext}`
+        `${content.id}_${format.name}.${format.ext}`
       );
       let command = [
         "-i",
-        content2.originalPath,
+        content.originalPath,
         "-c:v",
-        format2.codec,
+        format.codec,
         "-preset",
-        format2.preset,
+        format.preset,
         "-crf",
         "23",
         "-c:a",
-        format2.ext === "webm" ? "libopus" : "aac",
+        format.ext === "webm" ? "libopus" : "aac",
         "-b:a",
         "128k"
       ];
-      if (format2.name === "hls") {
+      if (format.name === "hls") {
         command.push(
           "-f",
           "hls",
@@ -7813,21 +7816,21 @@ var ContentProcessor = class extends EventEmitter3 {
         );
       }
       command.push("-y", outputPath);
-      await new Promise((resolve2, reject2) => {
+      await new Promise((resolve, reject) => {
         const process2 = spawn3("ffmpeg", command);
-        process2.on("close", (code2) => {
-          if (code2 === 0) {
-            content2.processedPaths[format2.name] = outputPath;
-            resolve2();
+        process2.on("close", (code) => {
+          if (code === 0) {
+            content.processedPaths[format.name] = outputPath;
+            resolve();
           } else {
-            reject2(new Error(`Transcoding failed for ${format2.name}`));
+            reject(new Error(`Transcoding failed for ${format.name}`));
           }
         });
       });
       task.progress = (i + 1) / formats.length * 100;
     }
   }
-  async addWatermark(content2, task) {
+  async addWatermark(content, task) {
     const watermarkedDir = join3(
       process.cwd(),
       "media",
@@ -7836,22 +7839,22 @@ var ContentProcessor = class extends EventEmitter3 {
     );
     const outputPath = join3(
       watermarkedDir,
-      `${content2.id}_watermarked${extname2(content2.originalPath)}`
+      `${content.id}_watermarked${extname2(content.originalPath)}`
     );
     let command = [];
-    if (content2.type === "image") {
+    if (content.type === "image") {
       command = [
         "-i",
-        content2.originalPath,
+        content.originalPath,
         "-vf",
         `drawtext=text='\xA9 Fanz\u2122 Unlimited Network LLC':fontsize=24:fontcolor=white@0.8:x=w-tw-10:y=h-th-10`,
         "-y",
         outputPath
       ];
-    } else if (content2.type === "video") {
+    } else if (content.type === "video") {
       command = [
         "-i",
-        content2.originalPath,
+        content.originalPath,
         "-vf",
         `drawtext=text='\xA9 Fanz\u2122 Unlimited Network LLC':fontsize=24:fontcolor=white@0.8:x=w-tw-10:y=h-th-10`,
         "-c:v",
@@ -7863,15 +7866,15 @@ var ContentProcessor = class extends EventEmitter3 {
       ];
     }
     if (command.length > 0) {
-      await new Promise((resolve2, reject2) => {
+      await new Promise((resolve, reject) => {
         const process2 = spawn3("ffmpeg", command);
-        process2.on("close", (code2) => {
-          if (code2 === 0) {
-            content2.processedPaths.watermarked = outputPath;
+        process2.on("close", (code) => {
+          if (code === 0) {
+            content.processedPaths.watermarked = outputPath;
             task.progress = 100;
-            resolve2();
+            resolve();
           } else {
-            reject2(new Error("Watermark application failed"));
+            reject(new Error("Watermark application failed"));
           }
         });
       });
@@ -7908,9 +7911,9 @@ var ContentProcessor = class extends EventEmitter3 {
     };
     return mimeTypes[ext] || "application/octet-stream";
   }
-  async calculateFileHash(filePath2) {
+  async calculateFileHash(filePath) {
     const crypto4 = __require("crypto");
-    const fileBuffer = await fs3.readFile(filePath2);
+    const fileBuffer = await fs3.readFile(filePath);
     return crypto4.createHash("sha256").update(fileBuffer).digest("hex");
   }
   getContent(contentId) {
@@ -7930,23 +7933,23 @@ var ContentProcessor = class extends EventEmitter3 {
     );
   }
   approveContent(contentId) {
-    const content2 = this.content.get(contentId);
-    if (content2) {
-      content2.approved = true;
-      content2.moderationFlags = content2.moderationFlags.filter(
+    const content = this.content.get(contentId);
+    if (content) {
+      content.approved = true;
+      content.moderationFlags = content.moderationFlags.filter(
         (flag) => !flag.includes("risk")
       );
-      this.emit("contentApproved", content2);
+      this.emit("contentApproved", content);
       return true;
     }
     return false;
   }
   rejectContent(contentId, reason) {
-    const content2 = this.content.get(contentId);
-    if (content2) {
-      content2.approved = false;
-      content2.moderationFlags.push(`rejected:${reason}`);
-      this.emit("contentRejected", content2, reason);
+    const content = this.content.get(contentId);
+    if (content) {
+      content.approved = false;
+      content.moderationFlags.push(`rejected:${reason}`);
+      this.emit("contentRejected", content, reason);
       return true;
     }
     return false;
@@ -7957,18 +7960,33 @@ var ContentProcessor = class extends EventEmitter3 {
   getAllTasks() {
     return Array.from(this.tasks.values());
   }
+  parseFraction(fractionStr) {
+    if (!fractionStr || typeof fractionStr !== "string") {
+      return 30;
+    }
+    const parts = fractionStr.split("/");
+    if (parts.length === 2) {
+      const numerator = parseFloat(parts[0]);
+      const denominator = parseFloat(parts[1]);
+      if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
+        return numerator / denominator;
+      }
+    }
+    const parsed = parseFloat(fractionStr);
+    return !isNaN(parsed) ? parsed : 30;
+  }
   getStats() {
-    const content2 = Array.from(this.content.values());
+    const content = Array.from(this.content.values());
     const tasks = Array.from(this.tasks.values());
     return {
       content: {
-        total: content2.length,
-        pending: content2.filter((c) => c.status === "pending").length,
-        processing: content2.filter((c) => c.status === "processing").length,
-        completed: content2.filter((c) => c.status === "completed").length,
-        failed: content2.filter((c) => c.status === "failed").length,
-        approved: content2.filter((c) => c.approved).length,
-        nsfw: content2.filter((c) => c.nsfw).length
+        total: content.length,
+        pending: content.filter((c) => c.status === "pending").length,
+        processing: content.filter((c) => c.status === "processing").length,
+        completed: content.filter((c) => c.status === "completed").length,
+        failed: content.filter((c) => c.status === "failed").length,
+        approved: content.filter((c) => c.approved).length,
+        nsfw: content.filter((c) => c.nsfw).length
       },
       tasks: {
         total: tasks.length,
@@ -8020,22 +8038,22 @@ var InternalAnalytics = class extends EventEmitter4 {
       this.persistEvents();
     }, 6e4);
   }
-  track(type2, category, properties = {}, metadata2 = {}) {
+  track(type, category, properties = {}, metadata = {}) {
     const eventId = this.generateEventId();
     const event = {
       id: eventId,
-      type: type2,
+      type,
       category,
-      userId: metadata2.userId,
-      sessionId: metadata2.sessionId,
+      userId: metadata.userId,
+      sessionId: metadata.sessionId,
       timestamp: /* @__PURE__ */ new Date(),
       properties,
       metadata: {
-        ip: metadata2.ip || "127.0.0.1",
-        userAgent: metadata2.userAgent || "Unknown",
-        referrer: metadata2.referrer,
-        platform: metadata2.platform || "web",
-        device: metadata2.device || "desktop"
+        ip: metadata.ip || "127.0.0.1",
+        userAgent: metadata.userAgent || "Unknown",
+        referrer: metadata.referrer,
+        platform: metadata.platform || "web",
+        device: metadata.device || "desktop"
       }
     };
     this.events.set(eventId, event);
@@ -8050,76 +8068,76 @@ var InternalAnalytics = class extends EventEmitter4 {
     return eventId;
   }
   // Predefined tracking methods for common events
-  trackPageView(page, userId, sessionId, metadata2 = {}) {
+  trackPageView(page, userId, sessionId, metadata = {}) {
     return this.track(
       "page_view",
       "navigation",
       { page },
-      { userId, sessionId, ...metadata2 }
+      { userId, sessionId, ...metadata }
     );
   }
-  trackContentView(contentId, contentType, userId, sessionId, metadata2 = {}) {
+  trackContentView(contentId, contentType, userId, sessionId, metadata = {}) {
     return this.track(
       "content_view",
       "engagement",
       { contentId, contentType },
-      { userId, sessionId, ...metadata2 }
+      { userId, sessionId, ...metadata }
     );
   }
-  trackContentUpload(contentId, contentType, size, userId, sessionId, metadata2 = {}) {
+  trackContentUpload(contentId, contentType, size, userId, sessionId, metadata = {}) {
     return this.track(
       "content_upload",
       "creation",
       { contentId, contentType, size },
-      { userId, sessionId, ...metadata2 }
+      { userId, sessionId, ...metadata }
     );
   }
-  trackStreamStart(streamId, userId, sessionId, metadata2 = {}) {
+  trackStreamStart(streamId, userId, sessionId, metadata = {}) {
     return this.track(
       "stream_start",
       "streaming",
       { streamId },
-      { userId, sessionId, ...metadata2 }
+      { userId, sessionId, ...metadata }
     );
   }
-  trackStreamView(streamId, userId, sessionId, metadata2 = {}) {
+  trackStreamView(streamId, userId, sessionId, metadata = {}) {
     return this.track(
       "stream_view",
       "streaming",
       { streamId },
-      { userId, sessionId, ...metadata2 }
+      { userId, sessionId, ...metadata }
     );
   }
-  trackPayment(amount, currency, processor, userId, sessionId, metadata2 = {}) {
+  trackPayment(amount, currency, processor, userId, sessionId, metadata = {}) {
     return this.track(
       "payment",
       "revenue",
       { amount, currency, processor },
-      { userId, sessionId, ...metadata2 }
+      { userId, sessionId, ...metadata }
     );
   }
-  trackModerationAction(action, contentId, moderatorId, reason, metadata2 = {}) {
+  trackModerationAction(action, contentId, moderatorId, reason, metadata = {}) {
     return this.track(
       "moderation_action",
       "safety",
       { action, contentId, moderatorId, reason },
-      { userId: moderatorId, ...metadata2 }
+      { userId: moderatorId, ...metadata }
     );
   }
-  trackError(error, category, userId, sessionId, metadata2 = {}) {
+  trackError(error, category, userId, sessionId, metadata = {}) {
     return this.track(
       "error",
       "system",
       { error, category },
-      { userId, sessionId, ...metadata2 }
+      { userId, sessionId, ...metadata }
     );
   }
-  trackAPICall(endpoint, method, statusCode, responseTime, userId, metadata2 = {}) {
+  trackAPICall(endpoint, method, statusCode, responseTime, userId, metadata = {}) {
     return this.track(
       "api_call",
       "system",
       { endpoint, method, statusCode, responseTime },
-      { userId, ...metadata2 }
+      { userId, ...metadata }
     );
   }
   async query(queryParams) {
@@ -8172,7 +8190,7 @@ var InternalAnalytics = class extends EventEmitter4 {
       },
       {}
     );
-    const topEvents = Object.entries(eventTypeCounts).sort(([, a], [, b]) => b - a).slice(0, 10).map(([type2, count2]) => ({ type: type2, count: count2 }));
+    const topEvents = Object.entries(eventTypeCounts).sort(([, a], [, b]) => b - a).slice(0, 10).map(([type, count2]) => ({ type, count: count2 }));
     const topCategories = Object.entries(categoryCounts).sort(([, a], [, b]) => b - a).slice(0, 10).map(([category, count2]) => ({ category, count: count2 }));
     const hourlyDistribution = Array.from({ length: 24 }, (_, hour) => {
       const count2 = events.filter(
@@ -8377,7 +8395,7 @@ var InternalAnalytics = class extends EventEmitter4 {
       },
       {}
     );
-    const topEvents = Object.entries(eventTypeCounts).sort(([, a], [, b]) => b - a).slice(0, 5).map(([type2, count2]) => ({ type: type2, count: count2 }));
+    const topEvents = Object.entries(eventTypeCounts).sort(([, a], [, b]) => b - a).slice(0, 5).map(([type, count2]) => ({ type, count: count2 }));
     const errorEvents = recentEvents.filter((e) => e.type === "error").length;
     const errorRate = recentEvents.length > 0 ? errorEvents / recentEvents.length * 100 : 0;
     const apiEvents = recentEvents.filter((e) => e.type === "api_call");
@@ -8810,13 +8828,13 @@ var PaymentProcessor = class extends EventEmitter5 {
     }
   }
   async processCreditCard(payment) {
-    return new Promise((resolve2) => {
+    return new Promise((resolve) => {
       setTimeout(() => {
         const success = Math.random() > 0.05;
         if (success) {
           payment.externalTransactionId = `cc_${randomUUID4()}`;
         }
-        resolve2(success);
+        resolve(success);
       }, 2e3);
     });
   }
@@ -8825,25 +8843,25 @@ var PaymentProcessor = class extends EventEmitter5 {
     if (!currency) return false;
     const paymentAddress = this.generatePaymentAddress(currency.symbol);
     payment.externalTransactionId = paymentAddress;
-    return new Promise((resolve2) => {
+    return new Promise((resolve) => {
       setTimeout(() => {
-        resolve2(Math.random() > 0.02);
+        resolve(Math.random() > 0.02);
       }, 5e3);
     });
   }
   async processBankTransfer(payment) {
     payment.externalTransactionId = `ach_${randomUUID4()}`;
-    return new Promise((resolve2) => {
+    return new Promise((resolve) => {
       setTimeout(() => {
-        resolve2(Math.random() > 0.01);
+        resolve(Math.random() > 0.01);
       }, 3e3);
     });
   }
   async processDigitalWallet(payment) {
     payment.externalTransactionId = `wallet_${randomUUID4()}`;
-    return new Promise((resolve2) => {
+    return new Promise((resolve) => {
       setTimeout(() => {
-        resolve2(Math.random() > 0.03);
+        resolve(Math.random() > 0.03);
       }, 1500);
     });
   }
@@ -9076,12 +9094,12 @@ var PaymentProcessor = class extends EventEmitter5 {
     account.lastUpdated = /* @__PURE__ */ new Date();
     this.emit("accountCredited", account, amount);
   }
-  async createAccount(userId, type2, currency) {
+  async createAccount(userId, type, currency) {
     const accountId = randomUUID4();
     const account = {
       id: accountId,
       userId,
-      type: type2,
+      type,
       balance: 0,
       currency,
       reservedAmount: 0,
@@ -9170,7 +9188,7 @@ var PaymentProcessor = class extends EventEmitter5 {
         if (!paymentMethod) continue;
         let success = false;
         const processingTime = Math.random() * 1e4;
-        await new Promise((resolve2) => setTimeout(resolve2, processingTime));
+        await new Promise((resolve) => setTimeout(resolve, processingTime));
         switch (paymentMethod.type) {
           case "crypto":
             success = Math.random() > 0.01;
@@ -9589,7 +9607,7 @@ var CDNDistribution = class extends EventEmitter6 {
       return existingAsset.id;
     }
     const mimeType = this.getMimeType(extname3(filename));
-    const metadata2 = await this.extractAssetMetadata(filepath, mimeType);
+    const metadata = await this.extractAssetMetadata(filepath, mimeType);
     const asset = {
       id: assetId,
       originalPath: filepath,
@@ -9602,7 +9620,7 @@ var CDNDistribution = class extends EventEmitter6 {
       accessCount: 0,
       hotness: 0,
       tags: options.tags || [],
-      metadata: metadata2,
+      metadata,
       variants: [],
       distribution: {
         nodes: [],
@@ -9633,9 +9651,9 @@ var CDNDistribution = class extends EventEmitter6 {
     return assetId;
   }
   async extractAssetMetadata(filepath, mimeType) {
-    const metadata2 = {};
+    const metadata = {};
     if (mimeType.startsWith("image/")) {
-      return new Promise((resolve2) => {
+      return new Promise((resolve) => {
         const process2 = spawn4("ffprobe", [
           "-v",
           "quiet",
@@ -9645,27 +9663,27 @@ var CDNDistribution = class extends EventEmitter6 {
           "-show_streams",
           filepath
         ]);
-        let output2 = "";
-        process2.stdout.on("data", (data2) => output2 += data2);
-        process2.on("close", (code2) => {
-          if (code2 === 0) {
+        let output = "";
+        process2.stdout.on("data", (data) => output += data);
+        process2.on("close", (code) => {
+          if (code === 0) {
             try {
-              const data2 = JSON.parse(output2);
-              const stream = data2.streams?.[0];
+              const data = JSON.parse(output);
+              const stream = data.streams?.[0];
               if (stream) {
-                metadata2.width = stream.width;
-                metadata2.height = stream.height;
-                metadata2.format = stream.codec_name;
+                metadata.width = stream.width;
+                metadata.height = stream.height;
+                metadata.format = stream.codec_name;
               }
             } catch (error) {
               console.error("Failed to parse image metadata:", error);
             }
           }
-          resolve2(metadata2);
+          resolve(metadata);
         });
       });
     } else if (mimeType.startsWith("video/")) {
-      return new Promise((resolve2) => {
+      return new Promise((resolve) => {
         const process2 = spawn4("ffprobe", [
           "-v",
           "quiet",
@@ -9675,32 +9693,32 @@ var CDNDistribution = class extends EventEmitter6 {
           "-show_streams",
           filepath
         ]);
-        let output2 = "";
-        process2.stdout.on("data", (data2) => output2 += data2);
-        process2.on("close", (code2) => {
-          if (code2 === 0) {
+        let output = "";
+        process2.stdout.on("data", (data) => output += data);
+        process2.on("close", (code) => {
+          if (code === 0) {
             try {
-              const data2 = JSON.parse(output2);
-              const videoStream2 = data2.streams?.find(
+              const data = JSON.parse(output);
+              const videoStream = data.streams?.find(
                 (s) => s.codec_type === "video"
               );
-              const format2 = data2.format;
-              if (videoStream2) {
-                metadata2.width = videoStream2.width;
-                metadata2.height = videoStream2.height;
-                metadata2.duration = parseFloat(format2.duration);
-                metadata2.bitrate = parseInt(format2.bit_rate);
-                metadata2.format = videoStream2.codec_name;
+              const format = data.format;
+              if (videoStream) {
+                metadata.width = videoStream.width;
+                metadata.height = videoStream.height;
+                metadata.duration = parseFloat(format.duration);
+                metadata.bitrate = parseInt(format.bit_rate);
+                metadata.format = videoStream.codec_name;
               }
             } catch (error) {
               console.error("Failed to parse video metadata:", error);
             }
           }
-          resolve2(metadata2);
+          resolve(metadata);
         });
       });
     }
-    return metadata2;
+    return metadata;
   }
   async generateAssetVariants(asset) {
     const variants = [];
@@ -9745,13 +9763,13 @@ var CDNDistribution = class extends EventEmitter6 {
           if (size.format) {
             command.splice(-2, 0, "-f", size.format);
           }
-          await new Promise((resolve2, reject2) => {
+          await new Promise((resolve, reject) => {
             const process2 = spawn4("ffmpeg", command);
-            process2.on("close", (code2) => {
-              if (code2 === 0) {
-                resolve2();
+            process2.on("close", (code) => {
+              if (code === 0) {
+                resolve();
               } else {
-                reject2(new Error(`Variant generation failed for ${size.name}`));
+                reject(new Error(`Variant generation failed for ${size.name}`));
               }
             });
           });
@@ -9783,7 +9801,7 @@ var CDNDistribution = class extends EventEmitter6 {
         );
         const duration = asset.metadata.duration || 10;
         const seekTime = duration * 0.1;
-        await new Promise((resolve2, reject2) => {
+        await new Promise((resolve, reject) => {
           const process2 = spawn4("ffmpeg", [
             "-i",
             asset.originalPath,
@@ -9796,9 +9814,9 @@ var CDNDistribution = class extends EventEmitter6 {
             "-y",
             thumbnailPath
           ]);
-          process2.on("close", (code2) => {
-            if (code2 === 0) resolve2();
-            else reject2(new Error("Thumbnail generation failed"));
+          process2.on("close", (code) => {
+            if (code === 0) resolve();
+            else reject(new Error("Thumbnail generation failed"));
           });
         });
         const stats = await fs5.stat(thumbnailPath);
@@ -9823,7 +9841,7 @@ var CDNDistribution = class extends EventEmitter6 {
             "variants",
             `${asset.id}_${quality.name}.mp4`
           );
-          await new Promise((resolve2, reject2) => {
+          await new Promise((resolve, reject) => {
             const process2 = spawn4("ffmpeg", [
               "-i",
               asset.originalPath,
@@ -9844,9 +9862,9 @@ var CDNDistribution = class extends EventEmitter6 {
               "-y",
               variantPath
             ]);
-            process2.on("close", (code2) => {
-              if (code2 === 0) resolve2();
-              else reject2(new Error(`${quality.name} generation failed`));
+            process2.on("close", (code) => {
+              if (code === 0) resolve();
+              else reject(new Error(`${quality.name} generation failed`));
             });
           });
           const stats = await fs5.stat(variantPath);
@@ -9894,11 +9912,11 @@ var CDNDistribution = class extends EventEmitter6 {
   }
   supportsAsset(node, asset) {
     if (node.supportedMimeTypes.includes("*/*")) return true;
-    return node.supportedMimeTypes.some((type2) => {
-      if (type2.endsWith("/*")) {
-        return asset.mimeType.startsWith(type2.slice(0, -1));
+    return node.supportedMimeTypes.some((type) => {
+      if (type.endsWith("/*")) {
+        return asset.mimeType.startsWith(type.slice(0, -1));
       }
-      return asset.mimeType === type2;
+      return asset.mimeType === type;
     });
   }
   async distributeAsset(asset) {
@@ -9920,12 +9938,12 @@ var CDNDistribution = class extends EventEmitter6 {
   async uploadAssetToNode(asset, nodeId) {
     const node = this.nodes.get(nodeId);
     if (!node) return;
-    return new Promise((resolve2) => {
+    return new Promise((resolve) => {
       const uploadTime = asset.size / (10 * 1024 * 1024) * 1e3;
       setTimeout(
         () => {
           node.usage.storage += asset.size / (1024 * 1024 * 1024);
-          resolve2();
+          resolve();
         },
         Math.max(1e3, uploadTime)
       );
@@ -10599,7 +10617,7 @@ var SystemMonitoring = class extends EventEmitter7 {
     collectMetrics();
   }
   async collectSystemMetrics() {
-    return new Promise((resolve2, reject2) => {
+    return new Promise((resolve, reject) => {
       const commands = [
         this.getCPUMetrics(),
         this.getMemoryMetrics(),
@@ -10608,7 +10626,7 @@ var SystemMonitoring = class extends EventEmitter7 {
         this.getProcessMetrics()
       ];
       Promise.all(commands).then(([cpu, memory, disk, network, processes]) => {
-        resolve2({
+        resolve({
           timestamp: /* @__PURE__ */ new Date(),
           cpu,
           memory,
@@ -10616,18 +10634,18 @@ var SystemMonitoring = class extends EventEmitter7 {
           network,
           processes
         });
-      }).catch(reject2);
+      }).catch(reject);
     });
   }
   async getCPUMetrics() {
-    return new Promise((resolve2) => {
+    return new Promise((resolve) => {
       const usage = Math.random() * 30 + 10;
       const loadAverage = [
         Math.random() * 2 + 0.5,
         Math.random() * 2 + 0.8,
         Math.random() * 2 + 1.2
       ];
-      resolve2({
+      resolve({
         usage,
         loadAverage,
         cores: 8,
@@ -10636,13 +10654,13 @@ var SystemMonitoring = class extends EventEmitter7 {
     });
   }
   async getMemoryMetrics() {
-    return new Promise((resolve2) => {
+    return new Promise((resolve) => {
       const total = 16 * 1024 * 1024 * 1024;
       const used = Math.floor(total * (Math.random() * 0.4 + 0.3));
       const free = total - used;
       const cached = Math.floor(used * 0.3);
       const available = free + cached;
-      resolve2({
+      resolve({
         total,
         used,
         free,
@@ -10653,11 +10671,11 @@ var SystemMonitoring = class extends EventEmitter7 {
     });
   }
   async getDiskMetrics() {
-    return new Promise((resolve2) => {
+    return new Promise((resolve) => {
       const total = 500 * 1024 * 1024 * 1024;
       const used = Math.floor(total * (Math.random() * 0.5 + 0.2));
       const free = total - used;
-      resolve2({
+      resolve({
         total,
         used,
         free,
@@ -10670,8 +10688,8 @@ var SystemMonitoring = class extends EventEmitter7 {
     });
   }
   async getNetworkMetrics() {
-    return new Promise((resolve2) => {
-      resolve2({
+    return new Promise((resolve) => {
+      resolve({
         bytesIn: Math.floor(Math.random() * 1e7 + 1e6),
         bytesOut: Math.floor(Math.random() * 5e6 + 5e5),
         packetsIn: Math.floor(Math.random() * 1e4 + 1e3),
@@ -10682,11 +10700,11 @@ var SystemMonitoring = class extends EventEmitter7 {
     });
   }
   async getProcessMetrics() {
-    return new Promise((resolve2) => {
+    return new Promise((resolve) => {
       const total = Math.floor(Math.random() * 50 + 150);
       const running = Math.floor(total * 0.1);
       const sleeping = total - running - 2;
-      resolve2({
+      resolve({
         total,
         running,
         sleeping,
@@ -10767,8 +10785,8 @@ var SystemMonitoring = class extends EventEmitter7 {
         return false;
       }
       if (check.expectedContent) {
-        const content2 = await response.text();
-        return content2.includes(check.expectedContent);
+        const content = await response.text();
+        return content.includes(check.expectedContent);
       }
       return response.ok;
     } catch (error) {
@@ -10776,20 +10794,20 @@ var SystemMonitoring = class extends EventEmitter7 {
     }
   }
   async executeTCPCheck(check) {
-    return new Promise((resolve2) => {
+    return new Promise((resolve) => {
       setTimeout(() => {
-        resolve2(Math.random() > 0.05);
+        resolve(Math.random() > 0.05);
       }, Math.random() * 100);
     });
   }
   async executeDatabaseCheck(check) {
-    return new Promise((resolve2) => {
+    return new Promise((resolve) => {
       setTimeout(
         () => {
           const success = Math.random() > 0.02;
           const responseTime = Math.random() * 50 + 5;
           this.updateServiceMetrics("database-postgres", responseTime, success);
-          resolve2(success);
+          resolve(success);
         },
         Math.random() * 20 + 5
       );
@@ -10974,7 +10992,7 @@ var SystemMonitoring = class extends EventEmitter7 {
     }
     return alertId;
   }
-  log(level, service, message, metadata2 = {}) {
+  log(level, service, message, metadata = {}) {
     const logId = randomUUID6();
     const logEntry = {
       id: logId,
@@ -10982,7 +11000,7 @@ var SystemMonitoring = class extends EventEmitter7 {
       level,
       service,
       message,
-      metadata: metadata2
+      metadata
     };
     this.logs.push(logEntry);
     if (this.logs.length > 1e4) {
@@ -10995,7 +11013,7 @@ var SystemMonitoring = class extends EventEmitter7 {
         title: `${level.toUpperCase()} in ${service}`,
         description: message,
         source: service,
-        metadata: { logId, ...metadata2 }
+        metadata: { logId, ...metadata }
       });
     }
     this.emit("logEntry", logEntry);
@@ -11654,7 +11672,7 @@ var MediaHub = class extends EventEmitter8 {
       throw new Error("Rate limit exceeded");
     }
     await new Promise(
-      (resolve2) => setTimeout(resolve2, Math.min(uploadTime, 5e3))
+      (resolve) => setTimeout(resolve, Math.min(uploadTime, 5e3))
     );
     operation.progress = 60;
     const platformAssetId = `${connector.id}_${randomUUID7()}`;
@@ -11674,7 +11692,7 @@ var MediaHub = class extends EventEmitter8 {
     };
     operation.progress = 80;
     this.emit("operationProgress", operation);
-    await new Promise((resolve2) => setTimeout(resolve2, 2e3));
+    await new Promise((resolve) => setTimeout(resolve, 2e3));
     asset.platforms[connector.id].status = "published";
     connector.metrics.totalUploads++;
     connector.metrics.successfulUploads++;
@@ -11686,7 +11704,7 @@ var MediaHub = class extends EventEmitter8 {
     if (!platformData) {
       throw new Error("Asset not found on platform");
     }
-    await new Promise((resolve2) => setTimeout(resolve2, 1e3));
+    await new Promise((resolve) => setTimeout(resolve, 1e3));
     platformData.lastSync = /* @__PURE__ */ new Date();
     connector.metrics.apiCallsToday++;
   }
@@ -11695,7 +11713,7 @@ var MediaHub = class extends EventEmitter8 {
     if (!platformData) {
       throw new Error("Asset not found on platform");
     }
-    await new Promise((resolve2) => setTimeout(resolve2, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     delete asset.platforms[connector.id];
     connector.metrics.apiCallsToday++;
   }
@@ -11704,7 +11722,7 @@ var MediaHub = class extends EventEmitter8 {
     if (!platformData) {
       throw new Error("Asset not found on platform");
     }
-    await new Promise((resolve2) => setTimeout(resolve2, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     platformData.views += Math.floor(Math.random() * 1e3);
     platformData.engagement.likes += Math.floor(Math.random() * 100);
     platformData.engagement.comments += Math.floor(Math.random() * 20);
@@ -11716,7 +11734,7 @@ var MediaHub = class extends EventEmitter8 {
     connector.metrics.totalEngagement += platformData.engagement.likes + platformData.engagement.comments + platformData.engagement.shares;
   }
   async executeAnalytics(operation, asset, connector) {
-    await new Promise((resolve2) => setTimeout(resolve2, 1e3));
+    await new Promise((resolve) => setTimeout(resolve, 1e3));
     const platformData = asset.platforms[connector.id];
     if (platformData) {
       asset.processing.analytics.viewCount += platformData.views;
@@ -12348,18 +12366,18 @@ var VRRenderingEngine = class extends EventEmitter9 {
   }
   async addVRContent(contentData) {
     const contentId = randomUUID8();
-    const metadata2 = await this.extractVRMetadata(
+    const metadata = await this.extractVRMetadata(
       contentData.originalPath,
       contentData.type
     );
-    const content2 = {
+    const content = {
       id: contentId,
       type: contentData.type,
       name: contentData.name,
       description: contentData.description,
       originalPath: contentData.originalPath,
       processedPaths: {},
-      metadata: metadata2,
+      metadata,
       qualitySettings: contentData.qualitySettings,
       processing: {
         status: "pending",
@@ -12377,14 +12395,14 @@ var VRRenderingEngine = class extends EventEmitter9 {
       updatedAt: /* @__PURE__ */ new Date(),
       createdBy: contentData.createdBy
     };
-    this.vrContent.set(contentId, content2);
-    this.processingQueue.push(content2);
-    this.emit("vrContentAdded", content2);
+    this.vrContent.set(contentId, content);
+    this.processingQueue.push(content);
+    this.emit("vrContentAdded", content);
     return contentId;
   }
   async extractVRMetadata(filePath, type) {
     return new Promise((resolve) => {
-      const process = spawn5("ffprobe", [
+      const process2 = spawn5("ffprobe", [
         "-v",
         "quiet",
         "-print_format",
@@ -12394,8 +12412,8 @@ var VRRenderingEngine = class extends EventEmitter9 {
         filePath
       ]);
       let output = "";
-      process.stdout.on("data", (data2) => output += data2);
-      process.on("close", async (code) => {
+      process2.stdout.on("data", (data) => output += data);
+      process2.on("close", async (code) => {
         let metadata = {
           resolution: "4K",
           format: "mp4",
@@ -12417,7 +12435,7 @@ var VRRenderingEngine = class extends EventEmitter9 {
             if (videoStream) {
               metadata.resolution = `${videoStream.width}x${videoStream.height}`;
               metadata.bitrate = parseInt(videoStream.bit_rate) || 0;
-              metadata.framerate = eval(videoStream.r_frame_rate) || 30;
+              metadata.framerate = this.parseFraction(videoStream.r_frame_rate) || 30;
               metadata.format = videoStream.codec_name;
             }
             if (format) {
@@ -12453,27 +12471,27 @@ var VRRenderingEngine = class extends EventEmitter9 {
     if (this.processingQueue.length === 0 || this.activeProcesses >= this.maxConcurrentProcesses) {
       return;
     }
-    const content2 = this.processingQueue.shift();
+    const content = this.processingQueue.shift();
     this.activeProcesses++;
     try {
-      await this.processVRContent(content2);
+      await this.processVRContent(content);
     } catch (error) {
-      content2.processing.status = "failed";
-      console.error(`VR processing failed for ${content2.id}:`, error);
-      this.emit("vrProcessingFailed", content2, error);
+      content.processing.status = "failed";
+      console.error(`VR processing failed for ${content.id}:`, error);
+      this.emit("vrProcessingFailed", content, error);
     } finally {
       this.activeProcesses--;
     }
   }
-  async processVRContent(content2) {
-    content2.processing.status = "processing";
-    content2.processing.startTime = /* @__PURE__ */ new Date();
-    this.emit("vrProcessingStarted", content2);
-    for (const stage of content2.processing.stages) {
+  async processVRContent(content) {
+    content.processing.status = "processing";
+    content.processing.startTime = /* @__PURE__ */ new Date();
+    this.emit("vrProcessingStarted", content);
+    for (const stage of content.processing.stages) {
       try {
         stage.status = "processing";
         stage.startTime = /* @__PURE__ */ new Date();
-        await this.executeProcessingStage(content2, stage);
+        await this.executeProcessingStage(content, stage);
         stage.status = "completed";
         stage.endTime = /* @__PURE__ */ new Date();
         stage.progress = 100;
@@ -12484,13 +12502,13 @@ var VRRenderingEngine = class extends EventEmitter9 {
         throw error;
       }
     }
-    content2.processing.status = "completed";
-    content2.processing.endTime = /* @__PURE__ */ new Date();
-    content2.processing.progress = 100;
-    content2.processing.totalProcessingTime = content2.processing.endTime.getTime() - content2.processing.startTime.getTime();
-    this.emit("vrProcessingCompleted", content2);
+    content.processing.status = "completed";
+    content.processing.endTime = /* @__PURE__ */ new Date();
+    content.processing.progress = 100;
+    content.processing.totalProcessingTime = content.processing.endTime.getTime() - content.processing.startTime.getTime();
+    this.emit("vrProcessingCompleted", content);
   }
-  async executeProcessingStage(content2, stage) {
+  async executeProcessingStage(content, stage) {
     const outputDir = join6(
       process.cwd(),
       "media",
@@ -12500,28 +12518,28 @@ var VRRenderingEngine = class extends EventEmitter9 {
     );
     switch (stage.name) {
       case "Format Conversion":
-        await this.convertVRFormat(content2, outputDir, stage);
+        await this.convertVRFormat(content, outputDir, stage);
         break;
       case "Spatial Optimization":
-        await this.optimizeForSpatial(content2, outputDir, stage);
+        await this.optimizeForSpatial(content, outputDir, stage);
         break;
       case "Quality Enhancement":
-        await this.enhanceQuality(content2, outputDir, stage);
+        await this.enhanceQuality(content, outputDir, stage);
         break;
       case "Platform Optimization":
-        await this.optimizeForPlatforms(content2, outputDir, stage);
+        await this.optimizeForPlatforms(content, outputDir, stage);
         break;
       case "Thumbnail Generation":
-        await this.generateVRThumbnail(content2, stage);
+        await this.generateVRThumbnail(content, stage);
         break;
     }
   }
-  async convertVRFormat(content2, outputDir, stage) {
-    const outputPath = join6(outputDir, `${content2.id}_converted.mp4`);
-    return new Promise((resolve2, reject2) => {
+  async convertVRFormat(content, outputDir, stage) {
+    const outputPath = join6(outputDir, `${content.id}_converted.mp4`);
+    return new Promise((resolve, reject) => {
       const ffmpegArgs = [
         "-i",
-        content2.originalPath,
+        content.originalPath,
         "-c:v",
         "libx264",
         "-preset",
@@ -12537,7 +12555,7 @@ var VRRenderingEngine = class extends EventEmitter9 {
         "-y",
         outputPath
       ];
-      if (content2.metadata.projection === "equirectangular") {
+      if (content.metadata.projection === "equirectangular") {
         ffmpegArgs.splice(
           -2,
           0,
@@ -12546,68 +12564,68 @@ var VRRenderingEngine = class extends EventEmitter9 {
         );
       }
       const process2 = spawn5("ffmpeg", ffmpegArgs);
-      process2.stderr?.on("data", (data2) => {
-        const output2 = data2.toString();
-        if (output2.includes("time=")) {
-          const timeMatch = output2.match(/time=(\d{2}):(\d{2}):(\d{2}\.\d{2})/);
-          if (timeMatch && content2.metadata.duration) {
+      process2.stderr?.on("data", (data) => {
+        const output = data.toString();
+        if (output.includes("time=")) {
+          const timeMatch = output.match(/time=(\d{2}):(\d{2}):(\d{2}\.\d{2})/);
+          if (timeMatch && content.metadata.duration) {
             const [, hours, minutes, seconds] = timeMatch;
             const currentTime = parseInt(hours) * 3600 + parseInt(minutes) * 60 + parseFloat(seconds);
             stage.progress = Math.min(
               95,
-              Math.round(currentTime / content2.metadata.duration * 100)
+              Math.round(currentTime / content.metadata.duration * 100)
             );
           }
         }
       });
-      process2.on("close", (code2) => {
-        if (code2 === 0) {
-          content2.processedPaths.optimized = outputPath;
+      process2.on("close", (code) => {
+        if (code === 0) {
+          content.processedPaths.optimized = outputPath;
           stage.progress = 100;
-          resolve2();
+          resolve();
         } else {
-          reject2(new Error(`Format conversion failed with code ${code2}`));
+          reject(new Error(`Format conversion failed with code ${code}`));
         }
       });
     });
   }
-  async optimizeForSpatial(content2, outputDir, stage) {
+  async optimizeForSpatial(content, outputDir, stage) {
     const steps = 20;
     for (let i = 0; i < steps; i++) {
-      await new Promise((resolve2) => setTimeout(resolve2, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       stage.progress = Math.round((i + 1) / steps * 100);
     }
-    const spatialPath = join6(outputDir, `${content2.id}_spatial.mp4`);
-    content2.processedPaths.stereo = spatialPath;
+    const spatialPath = join6(outputDir, `${content.id}_spatial.mp4`);
+    content.processedPaths.stereo = spatialPath;
   }
-  async enhanceQuality(content2, outputDir, stage) {
-    if (content2.qualitySettings.resolution === "8K") {
+  async enhanceQuality(content, outputDir, stage) {
+    if (content.qualitySettings.resolution === "8K") {
       const steps = 50;
       for (let i = 0; i < steps; i++) {
-        await new Promise((resolve2) => setTimeout(resolve2, 200));
+        await new Promise((resolve) => setTimeout(resolve, 200));
         stage.progress = Math.round((i + 1) / steps * 100);
       }
     } else {
       const steps = 25;
       for (let i = 0; i < steps; i++) {
-        await new Promise((resolve2) => setTimeout(resolve2, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
         stage.progress = Math.round((i + 1) / steps * 100);
       }
     }
-    const enhancedPath = join6(outputDir, `${content2.id}_enhanced.mp4`);
-    content2.processedPaths.compressed = enhancedPath;
+    const enhancedPath = join6(outputDir, `${content.id}_enhanced.mp4`);
+    content.processedPaths.compressed = enhancedPath;
   }
-  async optimizeForPlatforms(content2, outputDir, stage) {
+  async optimizeForPlatforms(content, outputDir, stage) {
     const platforms2 = ["oculus", "vive", "pico", "mobile"];
     for (let i = 0; i < platforms2.length; i++) {
       const platform = platforms2[i];
-      await new Promise((resolve2) => setTimeout(resolve2, 500));
-      const platformPath = join6(outputDir, `${content2.id}_${platform}.mp4`);
-      content2.processedPaths[platform] = platformPath;
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      const platformPath = join6(outputDir, `${content.id}_${platform}.mp4`);
+      content.processedPaths[platform] = platformPath;
       stage.progress = Math.round((i + 1) / platforms2.length * 100);
     }
   }
-  async generateVRThumbnail(content2, stage) {
+  async generateVRThumbnail(content, stage) {
     const thumbnailDir = join6(
       process.cwd(),
       "media",
@@ -12615,12 +12633,12 @@ var VRRenderingEngine = class extends EventEmitter9 {
       "content",
       "thumbnails"
     );
-    const thumbnailPath = join6(thumbnailDir, `${content2.id}_thumb.jpg`);
-    return new Promise((resolve2, reject2) => {
-      const seekTime = content2.metadata.duration ? content2.metadata.duration * 0.1 : 5;
+    const thumbnailPath = join6(thumbnailDir, `${content.id}_thumb.jpg`);
+    return new Promise((resolve, reject) => {
+      const seekTime = content.metadata.duration ? content.metadata.duration * 0.1 : 5;
       const process2 = spawn5("ffmpeg", [
         "-i",
-        content2.originalPath,
+        content.originalPath,
         "-ss",
         seekTime.toString(),
         "-vframes",
@@ -12630,13 +12648,13 @@ var VRRenderingEngine = class extends EventEmitter9 {
         "-y",
         thumbnailPath
       ]);
-      process2.on("close", (code2) => {
-        if (code2 === 0) {
-          content2.processedPaths.thumbnail = thumbnailPath;
+      process2.on("close", (code) => {
+        if (code === 0) {
+          content.processedPaths.thumbnail = thumbnailPath;
           stage.progress = 100;
-          resolve2();
+          resolve();
         } else {
-          reject2(new Error(`Thumbnail generation failed with code ${code2}`));
+          reject(new Error(`Thumbnail generation failed with code ${code}`));
         }
       });
     });
@@ -12710,25 +12728,25 @@ var VRRenderingEngine = class extends EventEmitter9 {
   }
   // Analytics and Reporting Methods
   getVRAnalytics() {
-    const content2 = Array.from(this.vrContent.values());
+    const content = Array.from(this.vrContent.values());
     const today = /* @__PURE__ */ new Date();
     today.setHours(0, 0, 0, 0);
-    const completedToday = content2.filter(
+    const completedToday = content.filter(
       (c) => c.processing.status === "completed" && c.processing.endTime && c.processing.endTime >= today
     ).length;
-    const totalProcessingTime = content2.filter((c) => c.processing.totalProcessingTime).reduce((sum, c) => sum + c.processing.totalProcessingTime, 0);
-    const completedContent = content2.filter(
+    const totalProcessingTime = content.filter((c) => c.processing.totalProcessingTime).reduce((sum, c) => sum + c.processing.totalProcessingTime, 0);
+    const completedContent = content.filter(
       (c) => c.processing.status === "completed"
     );
     const averageProcessingTime = completedContent.length > 0 ? totalProcessingTime / completedContent.length : 0;
-    const qualityDistribution = content2.reduce(
+    const qualityDistribution = content.reduce(
       (acc, c) => {
         acc[c.qualitySettings.resolution] = (acc[c.qualitySettings.resolution] || 0) + 1;
         return acc;
       },
       {}
     );
-    const platformDistribution = content2.reduce(
+    const platformDistribution = content.reduce(
       (acc, c) => {
         Object.keys(c.platforms).forEach((platform) => {
           acc[platform] = (acc[platform] || 0) + 1;
@@ -12738,7 +12756,7 @@ var VRRenderingEngine = class extends EventEmitter9 {
       {}
     );
     return {
-      totalContent: content2.length,
+      totalContent: content.length,
       processingQueue: this.processingQueue.length,
       completedToday,
       totalProcessingTime,
@@ -12832,10 +12850,10 @@ var VRRenderingEngine = class extends EventEmitter9 {
       },
       {}
     );
-    const interactionHeatmap = Object.entries(interactionCounts).map(([type2, data2]) => ({
-      type: type2,
-      count: data2.total,
-      successRate: data2.total > 0 ? data2.successful / data2.total * 100 : 0
+    const interactionHeatmap = Object.entries(interactionCounts).map(([type, data]) => ({
+      type,
+      count: data.total,
+      successRate: data.total > 0 ? data.successful / data.total * 100 : 0
     })).sort((a, b) => b.count - a.count);
     return {
       totalSessions,
@@ -12883,6 +12901,21 @@ var VRRenderingEngine = class extends EventEmitter9 {
       // Convert to seconds
     };
   }
+  parseFraction(fractionStr) {
+    if (!fractionStr || typeof fractionStr !== "string") {
+      return 30;
+    }
+    const parts = fractionStr.split("/");
+    if (parts.length === 2) {
+      const numerator = parseFloat(parts[0]);
+      const denominator = parseFloat(parts[1]);
+      if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
+        return numerator / denominator;
+      }
+    }
+    const parsed = parseFloat(fractionStr);
+    return !isNaN(parsed) ? parsed : 30;
+  }
 };
 var vrRenderingEngine = new VRRenderingEngine();
 
@@ -12917,7 +12950,7 @@ var mockOpenAIResponse = {
 async function callOpenAI(config) {
   if (isDevMode3) {
     console.log("\u{1F527} Development mode: Using mock OpenAI response for future tech analysis");
-    await new Promise((resolve2) => setTimeout(resolve2, 200));
+    await new Promise((resolve) => setTimeout(resolve, 200));
     return mockOpenAIResponse;
   }
   return openai4.chat.completions.create(config);
@@ -13770,7 +13803,7 @@ var AIFinanceCopilot = class {
   scenarios = /* @__PURE__ */ new Map();
   metrics = [];
   // AI-Powered Financial Analysis
-  async analyzeFinancialData(data2) {
+  async analyzeFinancialData(data) {
     try {
       const response = await openai5.chat.completions.create({
         model: "gpt-5",
@@ -13782,7 +13815,7 @@ var AIFinanceCopilot = class {
           },
           {
             role: "user",
-            content: `Analyze this financial data and provide insights: ${JSON.stringify(data2)}`
+            content: `Analyze this financial data and provide insights: ${JSON.stringify(data)}`
           }
         ],
         response_format: { type: "json_object" }
@@ -13940,11 +13973,11 @@ var AIFinanceCopilot = class {
     }
   }
   // Anomaly Detection
-  detectAnomalies(data2) {
+  detectAnomalies(data) {
     const anomalies = [];
-    if (data2.length < 7) return anomalies;
-    const recent = data2.slice(-7);
-    const baseline = data2.slice(-30, -7);
+    if (data.length < 7) return anomalies;
+    const recent = data.slice(-7);
+    const baseline = data.slice(-30, -7);
     const recentAvgRevenue = recent.reduce((sum, d) => sum + d.revenue.total, 0) / recent.length;
     const baselineAvgRevenue = baseline.reduce((sum, d) => sum + d.revenue.total, 0) / baseline.length;
     const revenueVariation = Math.abs(recentAvgRevenue - baselineAvgRevenue) / baselineAvgRevenue;
@@ -14143,7 +14176,7 @@ var AIFinanceCopilot = class {
     };
     return accuracies[model] || 0.85;
   }
-  generateForecastPoints(timeHorizon, data2) {
+  generateForecastPoints(timeHorizon, data) {
     const points = [];
     const baseRevenue = 285e3;
     for (let i = 1; i <= timeHorizon; i++) {
@@ -14368,7 +14401,7 @@ var AIPredictiveAnalytics = class {
     models.forEach((model) => this.models.set(model.id, model));
   }
   // Revenue Forecasting
-  async generateRevenueForecast(timeframe, data2) {
+  async generateRevenueForecast(timeframe, data) {
     if (isDevMode5) {
       console.log("\u{1F527} Development mode: Using mock revenue forecast");
       return this.generateMockRevenueForecast(timeframe);
@@ -14384,7 +14417,7 @@ var AIPredictiveAnalytics = class {
           },
           {
             role: "user",
-            content: `Generate ${timeframe} revenue forecast with detailed analysis including seasonal patterns, content type performance, and market growth projections. Historical data: ${JSON.stringify(data2 || {})}`
+            content: `Generate ${timeframe} revenue forecast with detailed analysis including seasonal patterns, content type performance, and market growth projections. Historical data: ${JSON.stringify(data || {})}`
           }
         ],
         response_format: { type: "json_object" }
@@ -14401,10 +14434,10 @@ var AIPredictiveAnalytics = class {
     }
   }
   // Content Performance Prediction
-  async predictContentPerformance(content2) {
+  async predictContentPerformance(content) {
     if (isDevMode5) {
       console.log("\u{1F527} Development mode: Using mock content prediction");
-      return this.generateMockContentPrediction(content2);
+      return this.generateMockContentPrediction(content);
     }
     try {
       const response = await openai6.chat.completions.create({
@@ -14417,7 +14450,7 @@ var AIPredictiveAnalytics = class {
           },
           {
             role: "user",
-            content: `Predict performance for content: ${JSON.stringify(content2)}. Include engagement predictions, revenue estimates, optimal timing, tag effectiveness, and audience matching.`
+            content: `Predict performance for content: ${JSON.stringify(content)}. Include engagement predictions, revenue estimates, optimal timing, tag effectiveness, and audience matching.`
           }
         ],
         response_format: { type: "json_object" }
@@ -14425,12 +14458,12 @@ var AIPredictiveAnalytics = class {
       const predictionData = JSON.parse(
         response.choices[0].message.content || "{}"
       );
-      const prediction = this.processContentPrediction(content2, predictionData);
-      this.contentPredictions.set(content2.id, prediction);
+      const prediction = this.processContentPrediction(content, predictionData);
+      this.contentPredictions.set(content.id, prediction);
       return prediction;
     } catch (error) {
       console.error("Content prediction failed:", error);
-      return this.generateMockContentPrediction(content2);
+      return this.generateMockContentPrediction(content);
     }
   }
   // Fan Churn Prediction
@@ -14520,73 +14553,73 @@ var AIPredictiveAnalytics = class {
     }
   }
   // Data Processing Methods
-  processForecastData(timeframe, data2) {
+  processForecastData(timeframe, data) {
     const days = timeframe === "7_days" ? 7 : timeframe === "30_days" ? 30 : timeframe === "90_days" ? 90 : 365;
-    const predictions = this.generatePredictionPoints(days, data2);
+    const predictions = this.generatePredictionPoints(days, data);
     return {
       timeframe,
       predictions,
-      seasonalPatterns: data2.seasonalPatterns || this.generateSeasonalPatterns(),
-      contentTypePerformance: data2.contentTypePerformance || this.generateContentTypePerformance(),
-      fanEngagementCorrelation: data2.fanEngagementCorrelation || {
+      seasonalPatterns: data.seasonalPatterns || this.generateSeasonalPatterns(),
+      contentTypePerformance: data.contentTypePerformance || this.generateContentTypePerformance(),
+      fanEngagementCorrelation: data.fanEngagementCorrelation || {
         correlation: 0.78,
         impact: "Strong positive correlation between engagement and revenue"
       },
-      marketGrowthProjections: data2.marketGrowthProjections || {
+      marketGrowthProjections: data.marketGrowthProjections || {
         conservative: 15e3,
         expected: 25e3,
         optimistic: 4e4
       },
-      creatorLifecycleAnalysis: data2.creatorLifecycleAnalysis || this.generateCreatorLifecycleAnalysis()
+      creatorLifecycleAnalysis: data.creatorLifecycleAnalysis || this.generateCreatorLifecycleAnalysis()
     };
   }
-  processContentPrediction(content2, data2) {
+  processContentPrediction(content, data) {
     return {
-      contentId: content2.id,
-      contentType: content2.type || "photo",
+      contentId: content.id,
+      contentType: content.type || "photo",
       predictions: {
-        engagement: data2.engagement || {
+        engagement: data.engagement || {
           likes: 1250,
           comments: 180,
           shares: 95,
           views: 8500,
           confidence: 0.87
         },
-        revenue: data2.revenue || {
+        revenue: data.revenue || {
           direct: 450,
           indirect: 180,
           total: 630,
           confidence: 0.82
         },
-        optimalTiming: data2.optimalTiming || {
+        optimalTiming: data.optimalTiming || {
           hour: 19,
           dayOfWeek: 6,
           reasoning: "Peak engagement during weekend evenings"
         },
-        tagEffectiveness: data2.tagEffectiveness || [
+        tagEffectiveness: data.tagEffectiveness || [
           { tag: "exclusive", effectiveness: 0.92, reach: 15e3 },
           { tag: "behind-scenes", effectiveness: 0.78, reach: 12e3 }
         ],
-        audienceMatch: data2.audienceMatch || {
+        audienceMatch: data.audienceMatch || {
           score: 0.85,
           demographics: { "18-24": 0.3, "25-34": 0.45, "35-44": 0.25 },
           preferences: ["exclusive content", "interactive posts"]
         }
       },
-      marketTrendAlignment: data2.marketTrendAlignment || {
+      marketTrendAlignment: data.marketTrendAlignment || {
         score: 0.79,
         trends: ["authentic content", "interactive experiences"],
         recommendations: ["Add interactive elements", "Focus on authenticity"]
       }
     };
   }
-  processChurnPrediction(fanData, data2) {
+  processChurnPrediction(fanData, data) {
     return {
       fanId: fanData.id,
-      riskLevel: data2.riskLevel || "medium",
-      churnProbability: data2.churnProbability || 0.34,
-      timeToChurn: data2.timeToChurn || 45,
-      riskFactors: data2.riskFactors || [
+      riskLevel: data.riskLevel || "medium",
+      churnProbability: data.churnProbability || 0.34,
+      timeToChurn: data.timeToChurn || 45,
+      riskFactors: data.riskFactors || [
         {
           factor: "Decreased engagement",
           impact: 0.7,
@@ -14598,7 +14631,7 @@ var AIPredictiveAnalytics = class {
           description: "Recent failed payment attempts"
         }
       ],
-      preventionStrategies: data2.preventionStrategies || [
+      preventionStrategies: data.preventionStrategies || [
         {
           strategy: "Personalized content",
           effectiveness: 0.75,
@@ -14612,21 +14645,21 @@ var AIPredictiveAnalytics = class {
           implementation: "Targeted re-engagement messages"
         }
       ],
-      lifetimeValuePrediction: data2.lifetimeValuePrediction || {
+      lifetimeValuePrediction: data.lifetimeValuePrediction || {
         current: 450,
         potential: 890,
         retentionROI: 3.2
       },
-      behaviorPatterns: data2.behaviorPatterns || {
+      behaviorPatterns: data.behaviorPatterns || {
         engagementTrend: "decreasing",
         spendingPattern: "stable",
         activityFrequency: "weekly"
       }
     };
   }
-  processMarketIntelligence(data2) {
+  processMarketIntelligence(data) {
     return {
-      platformAlgorithmChanges: data2.platformAlgorithmChanges || [
+      platformAlgorithmChanges: data.platformAlgorithmChanges || [
         {
           platform: "Instagram",
           change: "Increased video prioritization",
@@ -14635,7 +14668,7 @@ var AIPredictiveAnalytics = class {
           estimatedEffect: 0.15
         }
       ],
-      consumerSpendingPatterns: data2.consumerSpendingPatterns || {
+      consumerSpendingPatterns: data.consumerSpendingPatterns || {
         trend: "increasing",
         categories: {
           premium_content: { spend: 45, growth: 0.12, prediction: 52 },
@@ -14646,7 +14679,7 @@ var AIPredictiveAnalytics = class {
           millennials: { segment: "25-40", spend: 65, growth: 0.08 }
         }
       },
-      regulatoryDevelopments: data2.regulatoryDevelopments || [
+      regulatoryDevelopments: data.regulatoryDevelopments || [
         {
           regulation: "Digital Services Act",
           impact: "medium",
@@ -14655,7 +14688,7 @@ var AIPredictiveAnalytics = class {
           businessImpact: "Moderate compliance costs"
         }
       ],
-      technologyInnovations: data2.technologyInnovations || [
+      technologyInnovations: data.technologyInnovations || [
         {
           technology: "AR Filters",
           adoptionRate: 0.45,
@@ -14664,13 +14697,13 @@ var AIPredictiveAnalytics = class {
           timeToMainstream: "12-18 months"
         }
       ],
-      competitiveLandscape: data2.competitiveLandscape || {
+      competitiveLandscape: data.competitiveLandscape || {
         marketShare: { platform_a: 0.35, platform_b: 0.28, others: 0.37 },
         threats: ["New platform entry", "Price competition"],
         opportunities: ["International expansion", "AI integration"],
         positioning: "Premium creator-focused platform"
       },
-      economicFactors: data2.economicFactors || {
+      economicFactors: data.economicFactors || {
         disposableIncomeIndex: 1.05,
         digitalSpendingTrend: 1.18,
         marketSentiment: "bullish",
@@ -14681,17 +14714,17 @@ var AIPredictiveAnalytics = class {
       }
     };
   }
-  processPricingOptimization(currentPricing, data2) {
+  processPricingOptimization(currentPricing, data) {
     return {
       currentPricing,
-      demandCurveAnalysis: data2.demandCurveAnalysis || {
+      demandCurveAnalysis: data.demandCurveAnalysis || {
         premium_tier: [
           { price: 10, demand: 1e3, revenue: 1e4 },
           { price: 15, demand: 850, revenue: 12750 },
           { price: 20, demand: 650, revenue: 13e3 }
         ]
       },
-      competitorPricing: data2.competitorPricing || {
+      competitorPricing: data.competitorPricing || {
         competitor_a: {
           competitor: "Platform A",
           pricing: { premium: 12 },
@@ -14703,7 +14736,7 @@ var AIPredictiveAnalytics = class {
           positioning: "Premium"
         }
       },
-      priceElasticity: data2.priceElasticity || {
+      priceElasticity: data.priceElasticity || {
         premium_tier: {
           elasticity: -1.2,
           sensitivity: "high",
@@ -14711,7 +14744,7 @@ var AIPredictiveAnalytics = class {
           revenueImpact: 0.15
         }
       },
-      abTestInsights: data2.abTestInsights || [
+      abTestInsights: data.abTestInsights || [
         {
           test: "Premium Pricing",
           variants: { control: 15, variant_a: 18, variant_b: 22 },
@@ -14720,7 +14753,7 @@ var AIPredictiveAnalytics = class {
           impact: 0.12
         }
       ],
-      seasonalDemand: data2.seasonalDemand || {
+      seasonalDemand: data.seasonalDemand || {
         holiday_season: {
           season: "Q4",
           demandMultiplier: 1.4,
@@ -14755,7 +14788,7 @@ var AIPredictiveAnalytics = class {
       creatorLifecycleAnalysis: this.generateCreatorLifecycleAnalysis()
     };
   }
-  generatePredictionPoints(days, data2) {
+  generatePredictionPoints(days, data) {
     const points = [];
     const baseRevenue = 9500;
     for (let i = 1; i <= days; i++) {
@@ -14859,10 +14892,10 @@ var AIPredictiveAnalytics = class {
       }
     };
   }
-  generateMockContentPrediction(content2) {
+  generateMockContentPrediction(content) {
     return {
-      contentId: content2.id,
-      contentType: content2.type || "photo",
+      contentId: content.id,
+      contentType: content.type || "photo",
       predictions: {
         engagement: {
           likes: 1250,
@@ -15717,7 +15750,7 @@ var CreatorAutomationSystem = class {
   schedulingIntelligence = /* @__PURE__ */ new Map();
   engagementAutomation = /* @__PURE__ */ new Map();
   // Workflow Management
-  async createWorkflow(creatorId, name, type2, config) {
+  async createWorkflow(creatorId, name, type, config) {
     try {
       const response = await openai8.chat.completions.create({
         model: "gpt-5",
@@ -15729,7 +15762,7 @@ var CreatorAutomationSystem = class {
           },
           {
             role: "user",
-            content: `Create a ${type2} automation workflow for creator with configuration: ${JSON.stringify(config)}. Include smart triggers, personalized actions, and performance optimization.`
+            content: `Create a ${type} automation workflow for creator with configuration: ${JSON.stringify(config)}. Include smart triggers, personalized actions, and performance optimization.`
           }
         ],
         response_format: { type: "json_object" }
@@ -15740,11 +15773,11 @@ var CreatorAutomationSystem = class {
       const workflow = {
         id: `workflow_${Date.now()}`,
         name,
-        type: type2,
+        type,
         creatorId,
         status: "draft",
-        triggers: workflowData.triggers || this.getDefaultTriggers(type2),
-        actions: workflowData.actions || this.getDefaultActions(type2),
+        triggers: workflowData.triggers || this.getDefaultTriggers(type),
+        actions: workflowData.actions || this.getDefaultActions(type),
         analytics: {
           triggered: 0,
           completed: 0,
@@ -15758,11 +15791,11 @@ var CreatorAutomationSystem = class {
       return workflow;
     } catch (error) {
       console.error("Workflow creation failed:", error);
-      return this.createMockWorkflow(creatorId, name, type2);
+      return this.createMockWorkflow(creatorId, name, type);
     }
   }
   // AI Content Generation
-  async generateContent(creatorId, type2, input) {
+  async generateContent(creatorId, type, input) {
     try {
       const response = await openai8.chat.completions.create({
         model: "gpt-5",
@@ -15770,11 +15803,11 @@ var CreatorAutomationSystem = class {
         messages: [
           {
             role: "system",
-            content: `You are an AI content creation specialist for creator platforms. Generate ${type2} content that is engaging, authentic, and optimized for the creator economy.`
+            content: `You are an AI content creation specialist for creator platforms. Generate ${type} content that is engaging, authentic, and optimized for the creator economy.`
           },
           {
             role: "user",
-            content: `Generate ${type2} content with these requirements: Context: ${input.context}, Audience: ${input.audience}, Tone: ${input.tone}, Length: ${input.length}. Include variations, hashtags, and optimization suggestions.`
+            content: `Generate ${type} content with these requirements: Context: ${input.context}, Audience: ${input.audience}, Tone: ${input.tone}, Length: ${input.length}. Include variations, hashtags, and optimization suggestions.`
           }
         ],
         response_format: { type: "json_object" }
@@ -15785,10 +15818,10 @@ var CreatorAutomationSystem = class {
       const generation = {
         id: `content_${Date.now()}`,
         creatorId,
-        type: type2,
+        type,
         input,
         output: {
-          generated_text: contentData.generated_text || this.generateMockContent(type2, input),
+          generated_text: contentData.generated_text || this.generateMockContent(type, input),
           variations: contentData.variations || [],
           hashtags: contentData.hashtags || [],
           confidence: contentData.confidence || 0.85,
@@ -15801,7 +15834,7 @@ var CreatorAutomationSystem = class {
       return generation;
     } catch (error) {
       console.error("Content generation failed:", error);
-      return this.generateMockContentGeneration(creatorId, type2, input);
+      return this.generateMockContentGeneration(creatorId, type, input);
     }
   }
   // Scheduling Intelligence
@@ -15922,7 +15955,7 @@ var CreatorAutomationSystem = class {
     }
   }
   // Helper Methods
-  getDefaultTriggers(type2) {
+  getDefaultTriggers(type) {
     const triggers = {
       welcome_series: [
         {
@@ -15952,9 +15985,9 @@ var CreatorAutomationSystem = class {
         }
       ]
     };
-    return triggers[type2] || [];
+    return triggers[type] || [];
   }
-  getDefaultActions(type2) {
+  getDefaultActions(type) {
     const actions = {
       welcome_series: [
         {
@@ -15994,17 +16027,17 @@ var CreatorAutomationSystem = class {
         }
       ]
     };
-    return actions[type2] || [];
+    return actions[type] || [];
   }
-  createMockWorkflow(creatorId, name, type2) {
+  createMockWorkflow(creatorId, name, type) {
     return {
       id: `workflow_${Date.now()}`,
       name,
-      type: type2,
+      type,
       creatorId,
       status: "draft",
-      triggers: this.getDefaultTriggers(type2),
-      actions: this.getDefaultActions(type2),
+      triggers: this.getDefaultTriggers(type),
+      actions: this.getDefaultActions(type),
       analytics: {
         triggered: 0,
         completed: 0,
@@ -16015,14 +16048,14 @@ var CreatorAutomationSystem = class {
       updatedAt: /* @__PURE__ */ new Date()
     };
   }
-  generateMockContent(type2, input) {
-    const content2 = {
+  generateMockContent(type, input) {
+    const content = {
       template_content: "Check out my latest exclusive content! \u{1F525} More amazing content coming your way!",
       personalized_message: `Hey ${input.audience || "beautiful"}! Thank you so much for your amazing support! \u{1F495}`,
       caption: "Another day, another adventure! What would you like to see next? \u2728",
       auto_reply: "Thank you for your message! I appreciate your support so much! \u{1F496}"
     };
-    return content2[type2] || "Generated content based on your preferences.";
+    return content[type] || "Generated content based on your preferences.";
   }
   generateOptimizationSuggestions() {
     return {
@@ -16036,14 +16069,14 @@ var CreatorAutomationSystem = class {
       ]
     };
   }
-  generateMockContentGeneration(creatorId, type2, input) {
+  generateMockContentGeneration(creatorId, type, input) {
     return {
       id: `content_${Date.now()}`,
       creatorId,
-      type: type2,
+      type,
       input,
       output: {
-        generated_text: this.generateMockContent(type2, input),
+        generated_text: this.generateMockContent(type, input),
         variations: [
           "Variation 1 with different tone",
           "Variation 2 with alternative approach"
@@ -16592,7 +16625,7 @@ var EcosystemMaintenanceSystem = class {
   }
   async executeHealingAction(action) {
     await new Promise(
-      (resolve2) => setTimeout(resolve2, action.expectedDuration * 10)
+      (resolve) => setTimeout(resolve, action.expectedDuration * 10)
     );
     const success = Math.random() > 0.2;
     return success ? `${action.action} completed successfully` : `${action.action} failed`;
@@ -17459,7 +17492,7 @@ var StarzStudioService = class extends EventEmitter11 {
       const startTime = Date.now();
       const processingSteps = this.getProcessingSteps(job.type);
       for (let i = 0; i < processingSteps.length; i++) {
-        await new Promise((resolve2) => setTimeout(resolve2, 2e3));
+        await new Promise((resolve) => setTimeout(resolve, 2e3));
         job.progress = Math.floor((i + 1) / processingSteps.length * 100);
         this.emit("aiJobProgress", job);
       }
@@ -17887,14 +17920,14 @@ var ComplianceMonitoringSystem = class extends EventEmitter12 {
     ];
   }
   // Main compliance check function
-  checkCompliance(action, userId, content2, metadata2) {
+  checkCompliance(action, userId, content, metadata) {
     const eventId = `compliance_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const violations = [];
     let maxRiskLevel = "low" /* LOW */;
     let shouldBlock = false;
     let requiresApproval = false;
     for (const rule of this.violationRules) {
-      const contentToCheck = `${action} ${content2 || ""} ${JSON.stringify(metadata2 || {})}`.toLowerCase();
+      const contentToCheck = `${action} ${content || ""} ${JSON.stringify(metadata || {})}`.toLowerCase();
       const hasKeywordMatch = rule.keywords.some(
         (keyword) => contentToCheck.includes(keyword.toLowerCase())
       );
@@ -17913,7 +17946,7 @@ var ComplianceMonitoringSystem = class extends EventEmitter12 {
           requiresApproval = true;
         }
         if (rule.autoReportToAuthorities) {
-          this.reportToAuthorities(rule.type, userId, action, content2);
+          this.reportToAuthorities(rule.type, userId, action, content);
         }
       }
     }
@@ -17922,13 +17955,13 @@ var ComplianceMonitoringSystem = class extends EventEmitter12 {
       timestamp: /* @__PURE__ */ new Date(),
       userId,
       action,
-      content: content2,
+      content,
       riskLevel: maxRiskLevel,
       violations,
       blocked: shouldBlock,
       approvalRequired: requiresApproval && !shouldBlock,
       escalated: maxRiskLevel === "critical" /* CRITICAL */ || maxRiskLevel === "immediate_block" /* IMMEDIATE_BLOCK */,
-      details: { metadata: metadata2, rulesTriggered: violations.length }
+      details: { metadata, rulesTriggered: violations.length }
     };
     this.recentEvents.push(complianceEvent);
     if (this.recentEvents.length > 1e3) {
@@ -18047,7 +18080,7 @@ var ComplianceMonitoringSystem = class extends EventEmitter12 {
         return 0;
     }
   }
-  reportToAuthorities(violationType, userId, action, content2) {
+  reportToAuthorities(violationType, userId, action, content) {
     console.log(
       `\u{1F6A8} AUTOMATIC REPORT TO AUTHORITIES: ${violationType} by user ${userId}`
     );
@@ -18055,7 +18088,7 @@ var ComplianceMonitoringSystem = class extends EventEmitter12 {
       violationType,
       userId,
       action,
-      content: content2,
+      content,
       timestamp: /* @__PURE__ */ new Date()
     });
   }
@@ -19007,8 +19040,8 @@ UPL.SAFE_MODE()
         `.trim();
     }
   }
-  generateSafePreview(code2) {
-    return `PREVIEW: ${code2.split("\n")[1]?.trim() || "Command analysis"} (Safe simulation mode)`;
+  generateSafePreview(code) {
+    return `PREVIEW: ${code.split("\n")[1]?.trim() || "Command analysis"} (Safe simulation mode)`;
   }
   assessRisk(intent, platformState) {
     const riskFactors = {
@@ -19908,7 +19941,7 @@ async function registerRoutes(app2) {
   app2.post("/api/compliance/2257", isAuthenticated2, async (req, res) => {
     try {
       const userId = req.user.claims.sub;
-      const metadata2 = {
+      const metadata = {
         ipAddress: req.ip,
         userAgent: req.headers["user-agent"],
         deviceFingerprint: "placeholder",
@@ -19919,7 +19952,7 @@ async function registerRoutes(app2) {
       const record = await complianceService.createRecord(
         userId,
         req.body,
-        metadata2
+        metadata
       );
       res.json({ success: true, record });
     } catch (error) {
@@ -20109,8 +20142,8 @@ async function registerRoutes(app2) {
     }
   });
   app2.get("/api/vr/content", isAuthenticated2, (req, res) => {
-    const content2 = vrRenderingEngine.getAllVRContent();
-    res.json({ content: content2 });
+    const content = vrRenderingEngine.getAllVRContent();
+    res.json({ content });
   });
   app2.get("/api/ar/overlays", isAuthenticated2, (req, res) => {
     const overlays = vrRenderingEngine.getAllAROverlays();
@@ -20327,8 +20360,8 @@ async function registerRoutes(app2) {
   app2.get("/api/content/pending", async (req, res) => {
     try {
       const limit = parseInt(req.query.limit) || 20;
-      const content2 = await storage.getPendingContent(limit);
-      res.json(content2);
+      const content = await storage.getPendingContent(limit);
+      res.json(content);
     } catch (error) {
       console.error("Error fetching pending content:", error);
       res.status(500).json({ message: "Failed to fetch pending content" });
@@ -20337,12 +20370,12 @@ async function registerRoutes(app2) {
   app2.post("/api/content", async (req, res) => {
     try {
       const validatedData = insertContentItemSchema.parse(req.body);
-      const content2 = await storage.createContentItem(validatedData);
+      const content = await storage.createContentItem(validatedData);
       broadcastToModerators({
         type: "new_content",
-        data: content2
+        data: content
       });
-      res.json(content2);
+      res.json(content);
     } catch (error) {
       console.error("Error creating content item:", error);
       res.status(500).json({ message: "Failed to create content item" });
@@ -20473,10 +20506,10 @@ async function registerRoutes(app2) {
     isAuthenticated2,
     async (req, res) => {
       try {
-        const { timeframe, data: data2 } = req.body;
+        const { timeframe, data } = req.body;
         const forecast = await aiPredictiveAnalytics.generateRevenueForecast(
           timeframe,
-          data2
+          data
         );
         res.json({ forecast });
       } catch (error) {
@@ -20632,11 +20665,11 @@ async function registerRoutes(app2) {
     async (req, res) => {
       try {
         const userId = req.user.claims.sub;
-        const { name, type: type2, config } = req.body;
+        const { name, type, config } = req.body;
         const workflow = await creatorAutomationSystem.createWorkflow(
           userId,
           name,
-          type2,
+          type,
           config
         );
         res.json({ workflow });
@@ -20651,13 +20684,13 @@ async function registerRoutes(app2) {
     async (req, res) => {
       try {
         const userId = req.user.claims.sub;
-        const { type: type2, input } = req.body;
-        const content2 = await creatorAutomationSystem.generateContent(
+        const { type, input } = req.body;
+        const content = await creatorAutomationSystem.generateContent(
           userId,
-          type2,
+          type,
           input
         );
-        res.json({ content: content2 });
+        res.json({ content });
       } catch (error) {
         res.status(500).json({ error: "Failed to generate content" });
       }
@@ -20895,8 +20928,8 @@ async function registerRoutes(app2) {
   );
   app2.post("/api/starz-studio/ai-jobs", async (req, res) => {
     try {
-      const { projectId, type: type2, input, priority } = req.body;
-      if (!projectId || !type2) {
+      const { projectId, type, input, priority } = req.body;
+      if (!projectId || !type) {
         return res.status(400).json({
           success: false,
           error: "Project ID and job type are required"
@@ -20904,7 +20937,7 @@ async function registerRoutes(app2) {
       }
       const jobId = await starzStudioService.queueAIJob({
         projectId,
-        type: type2,
+        type,
         input,
         priority: priority || 5
       });
@@ -21051,8 +21084,8 @@ async function registerRoutes(app2) {
     console.log("Streaming WebSocket client connected");
     ws2.on("message", (message) => {
       try {
-        const data2 = JSON.parse(message.toString());
-        console.log("Streaming message:", data2);
+        const data = JSON.parse(message.toString());
+        console.log("Streaming message:", data);
       } catch (error) {
         console.error("Streaming WebSocket error:", error);
       }
@@ -21496,14 +21529,14 @@ I'll be back online shortly. Thank you for your patience!`;
   });
   app2.post("/api/admin/payout-requests", isAuthenticated2, async (req, res) => {
     try {
-      const { userId, tenantId, amountCents, currency, paymentMethod, metadata: metadata2 } = req.body;
+      const { userId, tenantId, amountCents, currency, paymentMethod, metadata } = req.body;
       const payout = await storage.createPayoutRequest({
         userId,
         tenantId,
         amountCents,
         currency: currency || "USD",
         paymentMethod,
-        metadata: metadata2 || {},
+        metadata: metadata || {},
         status: "pending",
         requestedAt: /* @__PURE__ */ new Date()
       });
@@ -21600,14 +21633,14 @@ I'll be back online shortly. Thank you for your patience!`;
   });
   app2.post("/api/admin/security/events", isAuthenticated2, async (req, res) => {
     try {
-      const { eventType, severity, description, userId, tenantId, metadata: metadata2 } = req.body;
+      const { eventType, severity, description, userId, tenantId, metadata } = req.body;
       const event = await storage.createSecurityEvent({
         eventType,
         severity,
         description,
         userId,
         tenantId,
-        metadata: metadata2 || {},
+        metadata: metadata || {},
         resolved: false,
         createdAt: /* @__PURE__ */ new Date()
       });
@@ -21702,13 +21735,13 @@ I'll be back online shortly. Thank you for your patience!`;
   });
   app2.post("/api/admin/flags", isAuthenticated2, async (req, res) => {
     try {
-      const { flagKey, tenantId, platform, enabled, metadata: metadata2, isKillSwitch } = req.body;
+      const { flagKey, tenantId, platform, enabled, metadata, isKillSwitch } = req.body;
       const flag = await storage.createGlobalFlag({
         flagKey,
         tenantId,
         platform,
         enabled: enabled !== false,
-        metadata: metadata2 || {},
+        metadata: metadata || {},
         isKillSwitch: isKillSwitch || false,
         createdAt: /* @__PURE__ */ new Date()
       });
@@ -22166,7 +22199,7 @@ I'll be back online shortly. Thank you for your patience!`;
   });
   app2.post("/api/webhooks/kyc/verification", async (req, res) => {
     try {
-      const { verificationId, status, providerId, metadata: metadata2, timestamp: timestamp2 } = req.body;
+      const { verificationId, status, providerId, metadata, timestamp: timestamp2 } = req.body;
       const signature = req.headers["x-webhook-signature"];
       if (!signature) {
         return res.status(401).json({ error: "Missing webhook signature" });
@@ -22174,12 +22207,12 @@ I'll be back online shortly. Thank you for your patience!`;
       const verification = await storage.updateKycVerification(verificationId, {
         status,
         providerId,
-        metadata: metadata2 || {},
+        metadata: metadata || {},
         reviewedAt: /* @__PURE__ */ new Date(),
         webhookReceivedAt: /* @__PURE__ */ new Date()
       });
       await storage.createAuditLog({
-        tenantId: metadata2?.tenantId || "global",
+        tenantId: metadata?.tenantId || "global",
         actorId: "system_webhook",
         action: "kyc_webhook_processed",
         targetType: "kyc_verification",
@@ -22187,7 +22220,7 @@ I'll be back online shortly. Thank you for your patience!`;
         details: {
           status,
           providerId,
-          webhookMetadata: metadata2,
+          webhookMetadata: metadata,
           processingTime: Date.now() - new Date(timestamp2).getTime()
         },
         severity: status === "approved" ? "info" : "warning",
@@ -22201,8 +22234,8 @@ I'll be back online shortly. Thank you for your patience!`;
           severity: "medium",
           description: `KYC verification ${verificationId} was rejected by ${providerId}`,
           userId: verification.userId,
-          tenantId: metadata2?.tenantId || "global",
-          metadata: { verificationId, providerId, reason: metadata2?.rejectionReason },
+          tenantId: metadata?.tenantId || "global",
+          metadata: { verificationId, providerId, reason: metadata?.rejectionReason },
           resolved: false,
           createdAt: /* @__PURE__ */ new Date()
         });
@@ -22306,7 +22339,7 @@ I'll be back online shortly. Thank you for your patience!`;
         violations,
         reviewerId,
         reviewedAt,
-        metadata: metadata2
+        metadata
       } = req.body;
       const signature = req.headers["x-ads-signature"];
       if (!signature) {
@@ -22321,7 +22354,7 @@ I'll be back online shortly. Thank you for your patience!`;
         webhookReceivedAt: /* @__PURE__ */ new Date()
       });
       await storage.createAuditLog({
-        tenantId: metadata2?.tenantId || "global",
+        tenantId: metadata?.tenantId || "global",
         actorId: reviewerId || "ads_review_system",
         action: "ad_creative_reviewed",
         targetType: "ad_creative",
@@ -22330,7 +22363,7 @@ I'll be back online shortly. Thank you for your patience!`;
           status,
           reviewNotes,
           violations,
-          reviewProcessingTime: metadata2?.processingTime
+          reviewProcessingTime: metadata?.processingTime
         },
         severity: violations && violations.length > 0 ? "warning" : "info",
         ipAddress: req.ip || "unknown",
@@ -22343,7 +22376,7 @@ I'll be back online shortly. Thank you for your patience!`;
           severity: "medium",
           description: `Ad creative ${creativeId} rejected for policy violations`,
           userId: creative.advertiserId,
-          tenantId: metadata2?.tenantId || "global",
+          tenantId: metadata?.tenantId || "global",
           metadata: {
             creativeId,
             violations,
@@ -22376,7 +22409,7 @@ I'll be back online shortly. Thank you for your patience!`;
   app2.post("/api/webhooks/events/:tenantId", async (req, res) => {
     try {
       const { tenantId } = req.params;
-      const { eventType, data: data2, source, timestamp: timestamp2 } = req.body;
+      const { eventType, data, source, timestamp: timestamp2 } = req.body;
       const tenant = await storage.getTenant(tenantId);
       if (!tenant) {
         return res.status(404).json({ error: "Tenant not found" });
@@ -22394,7 +22427,7 @@ I'll be back online shortly. Thank you for your patience!`;
         targetId: eventId,
         details: {
           eventType,
-          data: data2,
+          data,
           source,
           originalTimestamp: timestamp2,
           processingLatency: Date.now() - new Date(timestamp2).getTime()
@@ -22406,28 +22439,28 @@ I'll be back online shortly. Thank you for your patience!`;
       });
       switch (eventType) {
         case "user_verification":
-          console.log("\u{1F4CB} User verification event for tenant %s:", tenantId, data2);
+          console.log("\u{1F4CB} User verification event for tenant %s:", tenantId, data);
           break;
         case "payment_update":
-          console.log("\u{1F4B0} Payment update event for tenant %s:", tenantId, data2);
+          console.log("\u{1F4B0} Payment update event for tenant %s:", tenantId, data);
           break;
         case "content_moderation":
-          console.log("\u{1F6E1}\uFE0F Content moderation event for tenant %s:", tenantId, data2);
+          console.log("\u{1F6E1}\uFE0F Content moderation event for tenant %s:", tenantId, data);
           break;
         case "security_alert":
           await storage.createSecurityEvent({
             eventType: "external_security_alert",
-            severity: data2.severity || "medium",
-            description: data2.description || "External security alert received",
-            userId: data2.userId,
+            severity: data.severity || "medium",
+            description: data.description || "External security alert received",
+            userId: data.userId,
             tenantId,
-            metadata: { eventId, source, originalData: data2 },
+            metadata: { eventId, source, originalData: data },
             resolved: false,
             createdAt: /* @__PURE__ */ new Date()
           });
           break;
         default:
-          console.log("\u{1F4E1} Generic webhook event %s for tenant %s:", eventType, tenantId, data2);
+          console.log("\u{1F4E1} Generic webhook event %s for tenant %s:", eventType, tenantId, data);
       }
       res.json({
         success: true,
@@ -24084,8 +24117,8 @@ I'll be back online shortly. Thank you for your patience!`;
     console.log("Chat WebSocket client connected");
     ws2.on("message", (message) => {
       try {
-        const data2 = JSON.parse(message.toString());
-        console.log("Chat message:", data2);
+        const data = JSON.parse(message.toString());
+        console.log("Chat message:", data);
       } catch (error) {
         console.error("Chat WebSocket error:", error);
       }
@@ -24235,26 +24268,49 @@ app.use((req, res, next) => {
   next();
 });
 (async () => {
-  const server = await registerRoutes(app);
-  app.use((err, _req, res, _next) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-    res.status(status).json({ message });
-    throw err;
-  });
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
-  }
-  const port = parseInt(process.env.PORT || "3000", 10);
-  server.listen(
-    {
-      port,
-      host: "0.0.0.0"
-    },
-    () => {
-      log(`serving on port ${port}`);
+  try {
+    console.log("=== FanzDash Server Starting ===");
+    console.log("NODE_ENV:", process.env.NODE_ENV);
+    console.log("DATABASE_URL exists:", !!process.env.DATABASE_URL);
+    console.log("SESSION_SECRET exists:", !!process.env.SESSION_SECRET);
+    console.log("PORT:", process.env.PORT || 3e3);
+    const server = await registerRoutes(app);
+    console.log("\u2705 Routes registered successfully");
+    app.use((err, _req, res, _next) => {
+      const status = err.status || err.statusCode || 500;
+      const message = err.message || "Internal Server Error";
+      console.error("Express error handler:", err);
+      res.status(status).json({ message });
+      throw err;
+    });
+    if (app.get("env") === "development") {
+      await setupVite(app, server);
+      console.log("\u2705 Vite development server configured");
+    } else {
+      serveStatic(app);
+      console.log("\u2705 Static files configured for production");
     }
-  );
+    const port = parseInt(process.env.PORT || "3000", 10);
+    const host = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
+    server.listen(
+      {
+        port,
+        host
+      },
+      () => {
+        console.log(`\u2705 FanzDash server running on ${host}:${port}`);
+        log(`serving on port ${port}`);
+      }
+    );
+    server.on("error", (err) => {
+      console.error("\u274C Server error:", err);
+      if (err.code === "EADDRINUSE") {
+        console.error(`Port ${port} is already in use`);
+      }
+      process.exit(1);
+    });
+  } catch (error) {
+    console.error("\u274C Failed to start server:", error);
+    process.exit(1);
+  }
 })();
